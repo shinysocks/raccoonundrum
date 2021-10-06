@@ -26,22 +26,25 @@ class Cube(pygame.sprite.Sprite):
     def update(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.rotate(1)
+            self.rotate(1.2)
         if key[pygame.K_d]:
-            self.rotate(-1)
+            self.rotate(-1.2)
 
+cube = Cube()
+cube_rect = cube.rect
 
 class FreeFalling(pygame.sprite.Sprite):
     def __init__(self,image,center):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(center=center)
+        self.cube_rect = cube_rect
         self.pos_y = center[1]
         self.speed_y = 0
         self.gravity = 1
 
     def update(self):
-        if self.rect.bottom >= 400:
+        if not self.cube_rect.contains(self.rect):
             self.speed_y = 0
         else:
             self.speed_y += self.gravity/120
@@ -53,8 +56,7 @@ class Level():
 
 
 #Sprites Group
-cube = Cube()
-raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450,300])
+raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450,250])
 
 sprites_group = pygame.sprite.Group()
 sprites_group.add(cube,raccoon)
