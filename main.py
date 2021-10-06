@@ -1,5 +1,5 @@
 ### DEDICATED TO EMILY ###
-
+#boopity doop
 #Initial Setup
 import pygame
 from sys import exit
