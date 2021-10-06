@@ -1,27 +1,28 @@
-### DEDICATED TO EMILY ###
+# DEDICATED TO EMILY
 
-#Initial Setup
+# Initial Setup
 import pygame
 from sys import exit
 pygame.init()
-display = pygame.display.set_mode((900,700))
+display = pygame.display.set_mode((900, 700))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 
-#Classes
+
+# Classes
 class Cube(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image1 = pygame.Surface((300,300), pygame.SRCALPHA)
+        self.image1 = pygame.Surface((300, 300), pygame.SRCALPHA)
         self.image = self.image1
-        self.image.fill((200,100,39))
-        self.rect = self.image.get_rect(center=[450,350])
+        self.image.fill((200, 100, 39))
+        self.rect = self.image.get_rect(center=[450, 350])
         self.angle = 0
     
     def rotate(self, angle):
-            self.image = pygame.transform.rotozoom(self.image1, self.angle,1)
-            self.angle += angle 
-            self.rect = self.image.get_rect(center=[450,350]) 
+        self.image = pygame.transform.rotozoom(self.image1, self.angle, 1)
+        self.angle += angle
+        self.rect = self.image.get_rect(center=[450, 350])
 
     def update(self):
         key = pygame.key.get_pressed()
@@ -30,11 +31,13 @@ class Cube(pygame.sprite.Sprite):
         if key[pygame.K_d]:
             self.rotate(-1.2)
 
+
 cube = Cube()
 cube_rect = cube.rect
 
+
 class FreeFalling(pygame.sprite.Sprite):
-    def __init__(self,image,center):
+    def __init__(self, image, center):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(center=center)
@@ -51,17 +54,14 @@ class FreeFalling(pygame.sprite.Sprite):
             self.pos_y += self.speed_y
             self.rect.y = self.pos_y
 
-class Level():
-    pass
 
-
-#Sprites Group
-raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450,250])
+# Sprites Group
+raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450, 250])
 
 sprites_group = pygame.sprite.Group()
-sprites_group.add(cube,raccoon)
+sprites_group.add(cube, raccoon)
 
-#Game Loop
+# Game Loop
 while True:
     clock.tick(120)
     for event in pygame.event.get():
@@ -69,7 +69,7 @@ while True:
             pygame.quit()
             exit()
 
-    display.fill((23,34,120))
+    display.fill((23, 34, 120))
     sprites_group.draw(display)
     sprites_group.update()
     pygame.display.flip()
