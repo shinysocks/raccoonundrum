@@ -15,7 +15,7 @@ raccoon_image = pygame.image.load("assets/raccoon.png")
 # Classes
 class Cube:
     def __init__(self):
-        self.cube_image_1st = pygame.Surface((300, 300), pygame.SRCALPHA)
+        self.cube_image_1st = pygame.Surface((300, 300), pygame.SRCALPHA)  # cubesurf
         self.cube_image = self.cube_image_1st
         self.cube_image.fill((200, 100, 39))
         self.cube_rect = self.cube_image.get_rect(center=[450, 350])
