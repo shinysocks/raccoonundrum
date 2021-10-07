@@ -10,7 +10,16 @@ clock = pygame.time.Clock()
 
 # Sprite Art
 raccoon_image = pygame.image.load("assets/raccoon.png")
+#pygame.draw.rect()
+class Wall():
+    def __init__(self, y, x):
+        self.x = x * gridSize
+        self.y = y * gridSize
+        self.size = gridSize
+        self.color = (255, 0, 0)
 
+    def draw(self):
+        pygame.draw.rect(display, self.color, (self.x, self.y, self.size, self.size))
 
 # Classes
 class Cube:
