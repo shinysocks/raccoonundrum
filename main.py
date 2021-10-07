@@ -8,58 +8,62 @@ display = pygame.display.set_mode((900, 700))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 
+# Sprite Art
+raccoon_image = pygame.image.load("assets/raccoon.png")
+
 
 # Classes
-class Cube(pygame.sprite.Sprite):
+class Cube:
     def __init__(self):
-        super().__init__()
-        self.image1 = pygame.Surface((300, 300), pygame.SRCALPHA)
-        self.image = self.image1
-        self.image.fill((200, 100, 39))
-        self.rect = self.image.get_rect(center=[450, 350])
+        self.cube_image_1st = pygame.Surface((300, 300), pygame.SRCALPHA)
+        self.cube_image = self.cube_image_1st
+        self.cube_image.fill((200, 100, 39))
+        self.cube_rect = self.cube_image.get_rect(center=[450, 350])
         self.angle = 0
     
     def rotate(self, angle):
-        self.image = pygame.transform.rotozoom(self.image1, self.angle, 1)
+        self.cube_image = pygame.transform.rotozoom(self.cube_image_1st, self.angle, 1)
         self.angle += angle
-        self.rect = self.image.get_rect(center=[450, 350])
+        self.cube_rect = self.cube_image.get_rect(center=[450, 350])
 
     def update(self):
+        display.blit(self.cube_image, (450, 350))
+
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.rotate(1.2)
+            self.rotate(2)
         if key[pygame.K_d]:
-            self.rotate(-1.2)
+            self.rotate(-2)
 
 
 cube = Cube()
-cube_rect = cube.rect
+cube_rect = cube.cube_rect
 
 
-class FreeFalling(pygame.sprite.Sprite):
-    def __init__(self, image, center):
-        super().__init__()
+class FreeFalling:
+    def __init__(self, image):
         self.image = image
-        self.rect = self.image.get_rect(center=center)
+        self.image_rect = self.image.get_rect(center=[450, 250])
         self.cube_rect = cube_rect
-        self.pos_y = center[1]
+        self.pos_y = 450
         self.speed_y = 0
         self.gravity = 1
 
+    def apply_gravity(self):
+        self.speed_y += self.gravity/120
+        self.pos_y += self.speed_y
+        self.image_rect.y = self.pos_y
+
     def update(self):
-        if not self.cube_rect.contains(self.rect):
+        display.blit(self.image, (450, 250))
+
+        if not self.cube_rect.contains(self.image_rect):
             self.speed_y = 0
         else:
-            self.speed_y += self.gravity/120
-            self.pos_y += self.speed_y
-            self.rect.y = self.pos_y
+            self.apply_gravity()
 
 
-# Sprites Group
-raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450, 250])
-
-sprites_group = pygame.sprite.Group()
-sprites_group.add(cube, raccoon)
+raccoon = FreeFalling(raccoon_image)
 
 # Game Loop
 while True:
@@ -70,6 +74,6 @@ while True:
             exit()
 
     display.fill((23, 34, 120))
-    sprites_group.draw(display)
-    sprites_group.update()
+    cube.update()
+    raccoon.update()
     pygame.display.flip()
