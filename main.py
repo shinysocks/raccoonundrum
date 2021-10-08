@@ -71,14 +71,14 @@ class FreeFalling:
         self.image_rect.y = self.pos_y
 
     def update(self):
-        win.blit(self.image, (450, 250))
+        win.blit(self.image, self.image_rect)
         self.gravity()
 
 
 # Objects
 raccoon = FreeFalling(raccoon_image)
-block1 = MazeBlock(0, 1)
-block2 = MazeBlock(0, 3)
+block1 = MazeBlock(1, 1)
+block2 = MazeBlock(9, 3)
 
 # Game Loop
 while True:
