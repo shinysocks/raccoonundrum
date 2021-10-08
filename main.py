@@ -61,7 +61,7 @@ class MazeBlock:
         pygame.draw.rect(self.surf, self.color, (self.x, self.y, self.size, self.size))
 
 
-class Raccoon:
+class Player:
     def __init__(self, image):
         self.image = image
         self.image_rect = self.image.get_rect(center=[400, 0])
@@ -84,7 +84,7 @@ class Raccoon:
 block1 = MazeBlock(7, 5)
 block2 = MazeBlock(7, 6)
 block3 = MazeBlock(1, 1)
-raccoon = Raccoon(raccoon_image)
+raccoon = Player(raccoon_image)
 game_objects = [maze, raccoon, block1, block2, block3]
 
 # Game Loop
