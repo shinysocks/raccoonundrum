@@ -44,31 +44,25 @@ class MazeSurf:
             self.rotate(-2)
 
 
-maze = MazeSurf()
-surf_rect = maze.surf_rect
-surf = maze.surf
-
-
 class MazeBlock:
-    def __init__(self, y, x):
+    def __init__(self, y, x, maze_surf):
         self.x = x * 40
         self.y = y * 40
         self.size = 40
         self.color = (255, 0, 0)
-        self.surf =  surf
+        self.maze_surf = maze_surf
 
     def update(self):
-        pygame.draw.rect(self.surf, self.color, (self.x, self.y, self.size, self.size))
+        pygame.draw.rect(self.maze_surf, self.color, (self.x, self.y, self.size, self.size))
 
 
 class Player:
-    def __init__(self, image):
+    def __init__(self, image, surf_rect):
         self.image = image
         self.image_rect = self.image.get_rect(center=[400, 0])
-        self.maze_rect = surf_rect
-        self.pos_y = self.maze_rect.y
-        self.speed_y = 0
-        self.gravity_value = 0
+        self.pos_y = surf_rect.y
+        self.speed_y = 1
+        self.gravity_value = 9.8
 
     def gravity(self):
         self.speed_y += self.gravity_value/60
@@ -81,10 +75,12 @@ class Player:
 
 
 # Objects
-block1 = MazeBlock(7, 5)
-block2 = MazeBlock(7, 6)
-block3 = MazeBlock(1, 1)
-raccoon = Player(raccoon_image)
+
+maze = MazeSurf()
+block1 = MazeBlock(7, 5, maze.surf)
+block2 = MazeBlock(7, 6, maze.surf)
+block3 = MazeBlock(1, 1, maze.surf)
+raccoon = Player(raccoon_image, maze.surf_rect)
 game_objects = [maze, raccoon, block1, block2, block3]
 
 # Game Loop
