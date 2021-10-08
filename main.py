@@ -61,21 +61,18 @@ class FreeFalling:
         self.image = image
         self.image_rect = self.image.get_rect(center=[450, 250])
         self.cube_rect = cube_rect
-        self.pos_y = 450
+        self.pos_y = self.cube_rect.y
         self.speed_y = 0
         self.gravity_value = 1
 
     def gravity(self):
-        if self.cube_rect.contains(self.image_rect):
-            self.speed_y += self.gravity_value/120
-            self.pos_y += self.speed_y
-            self.image_rect.y = self.pos_y
-        else:
-            self.gravity_value = 0
+        self.speed_y += self.gravity_value/120
+        self.pos_y += self.speed_y
+        self.image_rect.y = self.pos_y
 
     def update(self):
-        self.gravity()
         win.blit(self.image, (450, 250))
+        self.gravity()
 
 
 # Objects
