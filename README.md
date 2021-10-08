@@ -3,7 +3,7 @@
 ---
 
 ## Movement
- - press the a and d keys to rotate the maze
+ - press the  <kbd>a</kbd>  and  <kbd>d</kbd>  keys to rotate the maze
 
 ## Dependencies
  - 
