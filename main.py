@@ -83,7 +83,9 @@ class Raccoon:
 # Objects
 block1 = MazeBlock(7, 5)
 block2 = MazeBlock(7, 6)
+block3 = MazeBlock(1, 1)
 raccoon = Raccoon(raccoon_image)
+maze_blocks = [block1, block2, block3]
 
 # Game Loop
 while True:
@@ -99,7 +101,7 @@ while True:
     win.fill((255, 255, 255))
     maze.update()
     raccoon.update()
-    block1.update()
-    block2.update()
+    for block in maze_blocks:
+        block.update()
 
     pygame.display.flip()
