@@ -41,32 +41,34 @@ class Surf:
             self.rotate(-2)
 
 
+cube = Surf()
+cube_rect = cube.cube_rect
+cube_surf = cube.cube_image
+
+
 class MazeBlock:
     def __init__(self, y, x):
         self.x = x * 40
         self.y = y * 40
         self.size = 40
         self.color = (255, 0, 0)
+        self.surf =  cube_surf
 
     def update(self):
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.size, self.size))
-
-
-cube = Surf()
-cube_rect = cube.cube_rect
+        pygame.draw.rect(self.surf, self.color, (self.x, self.y, self.size, self.size))
 
 
 class FreeFalling:
     def __init__(self, image):
         self.image = image
-        self.image_rect = self.image.get_rect(center=[450, 250])
+        self.image_rect = self.image.get_rect(center=[400, 0])
         self.cube_rect = cube_rect
         self.pos_y = self.cube_rect.y
         self.speed_y = 0
-        self.gravity_value = 1
+        self.gravity_value = 9.8
 
     def gravity(self):
-        self.speed_y += self.gravity_value/120
+        self.speed_y += self.gravity_value/60
         self.pos_y += self.speed_y
         self.image_rect.y = self.pos_y
 
@@ -82,7 +84,7 @@ block2 = MazeBlock(9, 3)
 
 # Game Loop
 while True:
-    clock.tick(120)
+    clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
