@@ -10,8 +10,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 
 # Sprite Art
-raccoon_image = pygame.image.load("assets/raccoon.png")
-raccoon_image = pygame.transform.scale(raccoon_image, (40, 40))
+raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (40, 40))
 
 # Classes
 
@@ -20,23 +19,54 @@ class Level:
     pass
 
 
-class MazeSurf:
+class MazeBlock(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.x = x * 40
+        self.y = y * 40
+        self.image = pygame.Surface((40, 40))
+        self.image.fill((200, 0, 35))
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+    def update(self):
+        pass
+
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, image, surf_rect):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(center=[400, 0])
+        self.pos_y = surf_rect.y
+        self.speed_y = 0
+        self.gravity_value = 9.8
+
+    def gravity(self):
+        self.speed_y += self.gravity_value/60
+        self.pos_y += self.speed_y
+        self.rect.y = self.pos_y
+
+    def update(self):
+        self.gravity()
+
+
+class MazeSurf(pygame.sprite.Sprite):
     def __init__(self):
-        self.surf1 = pygame.Surface((400, 400), pygame.SRCALPHA)
-        self.surf = self.surf1
-        self.surf.fill((200, 100, 39))
+        super().__init__()
+        self.first_image = pygame.Surface((400, 400), pygame.SRCALPHA)
+        self.image = self.first_image
+        self.image.fill((200, 100, 39))
         self.win_center = [win_width/2, win_length/2]
-        self.surf_rect = self.surf.get_rect(center=self.win_center)
+        self.rect = self.image.get_rect(center=self.win_center)
         self.angle = 0
 
     def rotate(self, angle):
-        self.surf = pygame.transform.rotozoom(self.surf1, self.angle, 1)
+        self.image = pygame.transform.rotozoom(self.first_image, self.angle, 1)
         self.angle += angle
-        self.surf_rect = self.surf.get_rect(center=self.win_center)
+        self.rect = self.image.get_rect(center=self.win_center)
 
     def update(self):
-        win.blit(self.surf, self.surf_rect)
-
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
             self.rotate(2)
@@ -44,44 +74,19 @@ class MazeSurf:
             self.rotate(-2)
 
 
-class MazeBlock:
-    def __init__(self, y, x, maze_surf):
-        self.x = x * 40
-        self.y = y * 40
-        self.size = 40
-        self.color = (255, 0, 0)
-        self.maze_surf = maze_surf
-
-    def update(self):
-        pygame.draw.rect(self.maze_surf, self.color, (self.x, self.y, self.size, self.size))
-
-
-class Player:
-    def __init__(self, image, surf_rect):
-        self.image = image
-        self.image_rect = self.image.get_rect(center=[400, 0])
-        self.pos_y = surf_rect.y
-        self.speed_y = 1
-        self.gravity_value = 9.8
-
-    def gravity(self):
-        self.speed_y += self.gravity_value/60
-        self.pos_y += self.speed_y
-        self.image_rect.y = self.pos_y
-
-    def update(self):
-        win.blit(self.image, self.image_rect)
-        self.gravity()
-
+# Functions
+def recenter():
+    pass
 
 # Objects
 
 maze = MazeSurf()
-block1 = MazeBlock(7, 5, maze.surf)
-block2 = MazeBlock(7, 6, maze.surf)
-block3 = MazeBlock(1, 1, maze.surf)
-raccoon = Player(raccoon_image, maze.surf_rect)
-game_objects = [maze, raccoon, block1, block2, block3]
+block1 = MazeBlock(7, 5)
+block2 = MazeBlock(7, 6)
+block3 = MazeBlock(1, 1)
+raccoon = Player(raccoon_image, maze.rect)
+sprites = pygame.sprite.Group(maze, raccoon)
+maze_blocks = pygame.sprite.Group(block1, block2, block3)
 
 # Game Loop
 while True:
@@ -95,7 +100,8 @@ while True:
             cube.win_center = [win_width/2, win_length/2] # fix this
 
     win.fill((255, 255, 255))
-    for obj in game_objects:
-        obj.update()
+    sprites.draw(win)
+    maze_blocks.draw(maze.image)
+    sprites.update()
 
     pygame.display.flip()
