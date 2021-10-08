@@ -4,62 +4,81 @@
 import pygame
 from sys import exit
 pygame.init()
-display = pygame.display.set_mode((900, 700))
+win_width, win_length = 1100, 750
+win = pygame.display.set_mode((win_width, win_length), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 
+# Sprite Art
+raccoon_image = pygame.image.load("assets/raccoon.png")
 
 # Classes
-class Cube(pygame.sprite.Sprite):
+
+
+class Surf:
     def __init__(self):
-        super().__init__()
-        self.image1 = pygame.Surface((300, 300), pygame.SRCALPHA)
-        self.image = self.image1
-        self.image.fill((200, 100, 39))
-        self.rect = self.image.get_rect(center=[450, 350])
+        self.cube_image_1st = pygame.Surface((400, 400), pygame.SRCALPHA)  # cubesurf
+        self.cube_image = self.cube_image_1st
+        self.cube_image.fill((200, 100, 39))
+        self.cube_rect = self.cube_image.get_rect(center=[win_width/2, win_length/2])
         self.angle = 0
-    
+
+    def resize(self):
+        self.cube_rect = self.cube_image.get_rect(center=[win_width / 2, win_length / 2])
+
     def rotate(self, angle):
-        self.image = pygame.transform.rotozoom(self.image1, self.angle, 1)
+        self.cube_image = pygame.transform.rotozoom(self.cube_image_1st, self.angle, 1)
         self.angle += angle
-        self.rect = self.image.get_rect(center=[450, 350])
+        self.resize()
 
     def update(self):
+        win.blit(self.cube_image, self.cube_rect)
+
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.rotate(1.2)
+            self.rotate(2)
         if key[pygame.K_d]:
-            self.rotate(-1.2)
+            self.rotate(-2)
 
 
-cube = Cube()
-cube_rect = cube.rect
-
-
-class FreeFalling(pygame.sprite.Sprite):
-    def __init__(self, image, center):
-        super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect(center=center)
-        self.cube_rect = cube_rect
-        self.pos_y = center[1]
-        self.speed_y = 0
-        self.gravity = 1
+class MazeBlock:
+    def __init__(self, y, x):
+        self.x = x * 40
+        self.y = y * 40
+        self.size = 40
+        self.color = (255, 0, 0)
 
     def update(self):
-        if not self.cube_rect.contains(self.rect):
-            self.speed_y = 0
-        else:
-            self.speed_y += self.gravity/120
-            self.pos_y += self.speed_y
-            self.rect.y = self.pos_y
+        pygame.draw.rect(win, self.color, (self.x, self.y, self.size, self.size))
 
 
-# Sprites Group
-raccoon = FreeFalling(pygame.image.load("assets/raccoon.png"), [450, 250])
+cube = Surf()
+cube_rect = cube.cube_rect
 
-sprites_group = pygame.sprite.Group()
-sprites_group.add(cube, raccoon)
+
+class FreeFalling:
+    def __init__(self, image):
+        self.image = image
+        self.image_rect = self.image.get_rect(center=[450, 250])
+        self.cube_rect = cube_rect
+        self.pos_y = self.cube_rect.y
+        self.speed_y = 0
+        self.gravity_value = 1
+
+    def gravity(self):
+        self.speed_y += self.gravity_value/120
+        self.pos_y += self.speed_y
+        self.image_rect.y = self.pos_y
+
+    def update(self):
+        win.blit(self.image, self.image_rect)
+        self.gravity()
+
+
+# Objects
+raccoon = FreeFalling(raccoon_image)
+block1 = MazeBlock(1, 1)
+block2 = MazeBlock(9, 3)
 
 # Game Loop
 while True:
@@ -68,8 +87,14 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        elif event.type == pygame.VIDEORESIZE:
+            cube.resize()
+            print("boop")
 
-    display.fill((23, 34, 120))
-    sprites_group.draw(display)
-    sprites_group.update()
+    win.fill((255, 255, 255))
+    cube.update()
+    raccoon.update()
+    block1.update()
+    block2.update()
+
     pygame.display.flip()
