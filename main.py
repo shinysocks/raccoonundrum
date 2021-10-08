@@ -81,7 +81,7 @@ class FreeFalling:
 # Objects
 raccoon = FreeFalling(raccoon_image)
 block1 = MazeBlock(0, 1)
-block2 = MazeBlock(0, 2)
+block2 = MazeBlock(0, 3)
 
 # Game Loop
 while True:
@@ -97,6 +97,7 @@ while True:
     win.fill((255, 255, 255))
     cube.update()
     raccoon.update()
-    block1, block2.update()
+    block1.update()
+    block2.update()
 
     pygame.display.flip()
