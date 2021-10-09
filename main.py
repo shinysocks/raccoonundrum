@@ -32,7 +32,6 @@ class MazeBlock(pygame.sprite.Sprite):
         pass
 
 
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, image, surf_rect):
         super().__init__()
@@ -80,6 +79,7 @@ def recenter():
 
 # Objects
 
+
 maze = MazeSurf()
 block1 = MazeBlock(7, 5)
 block2 = MazeBlock(7, 6)
@@ -96,8 +96,7 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.VIDEORESIZE:
-            win_width, win_length = win_width, win_length
-            cube.win_center = [win_width/2, win_length/2] # fix this
+            pass
 
     win.fill((255, 255, 255))
     sprites.draw(win)
