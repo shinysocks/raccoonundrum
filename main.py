@@ -4,8 +4,7 @@
 import pygame
 from sys import exit
 pygame.init()
-win_width, win_length = 700, 600
-win = pygame.display.set_mode((win_width, win_length), pygame.RESIZABLE)
+win = pygame.display.set_mode((700, 600), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 
@@ -56,14 +55,17 @@ class MazeSurf(pygame.sprite.Sprite):
         self.first_image = pygame.Surface((400, 400), pygame.SRCALPHA)
         self.image = self.first_image
         self.image.fill((200, 100, 39))
-        self.win_center = [win_width/2, win_length/2]
+        self.win_center = [350, 300]
         self.rect = self.image.get_rect(center=self.win_center)
         self.angle = 0
+
+    def recenter(self):
+        self.rect = self.image.get_rect(center=self.win_center)
 
     def rotate(self, angle):
         self.image = pygame.transform.rotozoom(self.first_image, self.angle, 1)
         self.angle += angle
-        self.rect = self.image.get_rect(center=self.win_center)
+        self.recenter()
 
     def update(self):
         key = pygame.key.get_pressed()
@@ -74,8 +76,7 @@ class MazeSurf(pygame.sprite.Sprite):
 
 
 # Functions
-def recenter():
-    pass
+
 
 # Objects
 
@@ -96,11 +97,12 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.VIDEORESIZE:
-            pass
+            maze.win_center = [win.get_width()/2, win.get_height()/2]
+            maze.recenter()
 
     win.fill((255, 255, 255))
-    sprites.draw(win)
     maze_blocks.draw(maze.image)
+    sprites.draw(win)
     sprites.update()
 
     pygame.display.flip()
