@@ -14,10 +14,6 @@ raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), 
 # Classes
 
 
-class Level:
-    pass
-
-
 class MazeBlock(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -29,6 +25,7 @@ class MazeBlock(pygame.sprite.Sprite):
 
     def update(self):
         pass
+        # collisions
 
 
 class Player(pygame.sprite.Sprite):
@@ -75,14 +72,15 @@ class MazeSurf(pygame.sprite.Sprite):
             self.rotate(-2)
 
 
-# Functions
-
+# Levels
+one = {
+    "x": 7,
+    "y": 6
+}
 
 # Objects
-
-
 maze = MazeSurf()
-block1 = MazeBlock(7, 5)
+block1 = MazeBlock(one["x"], one["y"])
 block2 = MazeBlock(7, 6)
 block3 = MazeBlock(1, 1)
 raccoon = Player(raccoon_image, maze.rect)
