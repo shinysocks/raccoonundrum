@@ -75,27 +75,32 @@ class MazeSurf(pygame.sprite.Sprite):
 # Levels
 one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-for block in one:
-    pass
+x = 0
+y = 0
+for i in range(0, 100):
+    if one[ x + (y*10) ] == 1:
+        list1 = [x, y]
+    x += 1
+    if x > 9:
+        x = 0
+        y += 1
 
 
 # Objects
 maze = MazeSurf()
-block1 = MazeBlock([7,6])
-block2 = MazeBlock([9,9])
-block3 = MazeBlock([1,1])
+block1 = MazeBlock(list1)
 raccoon = Player(raccoon_image, maze.rect)
 sprites = pygame.sprite.Group(maze, raccoon)
-maze_blocks = pygame.sprite.Group(block1, block2, block3)
+maze_blocks = pygame.sprite.Group(block1)
 
 # Game Loop
 while True:
