@@ -15,12 +15,12 @@ raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), 
 
 
 class MazeBlock(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, pos):
         super().__init__()
-        self.x = x * 40
-        self.y = y * 40
+        self.x = pos[0] * 40
+        self.y = pos[1] * 40
         self.image = pygame.Surface((40, 40))
-        self.image.fill((200, 0, 35))
+        self.image.fill((0, 250, 35))
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def update(self):
@@ -73,16 +73,26 @@ class MazeSurf(pygame.sprite.Sprite):
 
 
 # Levels
-one = {
-    "x": 7,
-    "y": 6
-}
+one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+for block in one:
+    pass
+
 
 # Objects
 maze = MazeSurf()
-block1 = MazeBlock(one["x"], one["y"])
-block2 = MazeBlock(7, 6)
-block3 = MazeBlock(1, 1)
+block1 = MazeBlock([7,6])
+block2 = MazeBlock([9,9])
+block3 = MazeBlock([1,1])
 raccoon = Player(raccoon_image, maze.rect)
 sprites = pygame.sprite.Group(maze, raccoon)
 maze_blocks = pygame.sprite.Group(block1, block2, block3)
