@@ -15,17 +15,20 @@ raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), 
 
 
 class MazeBlock(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, level):
         super().__init__()
-        self.x = pos[0] * 40
-        self.y = pos[1] * 40
+        self.level = level
+        self.x = 0
+        self.y = 0
         self.image = pygame.Surface((40, 40))
         self.image.fill((0, 250, 35))
-        self.rect = self.image.get_rect(topleft=(self.x, self.y))
-
-    def update(self):
-        pass
-        # collisions
+        for _ in self.level:
+            if self.level[self.x + (self.y * 10)] == 1:
+                self.rect = self.image.get_rect(topleft=(self.x*40, self.y*40))
+            self.x += 1
+            if self.x > 9:
+                self.x = 0
+                self.y += 1
 
 
 class Player(pygame.sprite.Sprite):
@@ -77,30 +80,23 @@ one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 
-x = 0
-y = 0
-for i in range(0, 100):
-    if one[ x + (y*10) ] == 1:
-        list1 = [x, y]
-    x += 1
-    if x > 9:
-        x = 0
-        y += 1
+#spritecollide(sprite, group, dokill, collided = None)
 
 
 # Objects
 maze = MazeSurf()
-block1 = MazeBlock(list1)
+block1 = MazeBlock(one)
 raccoon = Player(raccoon_image, maze.rect)
 sprites = pygame.sprite.Group(maze, raccoon)
 maze_blocks = pygame.sprite.Group(block1)
+maze_blocks.draw(maze.image)
 
 # Game Loop
 while True:
@@ -114,7 +110,6 @@ while True:
             maze.recenter()
 
     win.fill((255, 255, 255))
-    maze_blocks.draw(maze.image)
     sprites.draw(win)
     sprites.update()
 
