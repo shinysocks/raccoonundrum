@@ -10,43 +10,9 @@ clock = pygame.time.Clock()
 
 # Sprite Art
 raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (40, 40))
+trash_image = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
 
 # Classes
-
-
-class MazeBlock(pygame.sprite.Sprite):
-    def __init__(self, level):
-        super().__init__()
-        self.level = level
-        self.x = 0
-        self.y = 0
-        self.image = pygame.Surface((40, 40))
-        self.image.fill((0, 250, 35))
-        for _ in self.level:
-            if self.level[self.x + (self.y * 10)] == 1:
-                self.rect = self.image.get_rect(topleft=(self.x*40, self.y*40))
-            self.x += 1
-            if self.x > 9:
-                self.x = 0
-                self.y += 1
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, image, surf_rect):
-        super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect(center=[400, 0])
-        self.pos_y = surf_rect.y
-        self.speed_y = 0
-        self.gravity_value = 9.8
-
-    def gravity(self):
-        self.speed_y += self.gravity_value/60
-        self.pos_y += self.speed_y
-        self.rect.y = self.pos_y
-
-    def update(self):
-        self.gravity()
 
 
 class MazeSurf(pygame.sprite.Sprite):
@@ -65,6 +31,10 @@ class MazeSurf(pygame.sprite.Sprite):
     def rotate(self, angle):
         self.image = pygame.transform.rotozoom(self.first_image, self.angle, 1)
         self.angle += angle
+        if self.angle < 0:
+            self.angle = 360
+        if self.angle > 360:
+            self.angle = 0
         self.recenter()
 
     def update(self):
@@ -75,28 +45,84 @@ class MazeSurf(pygame.sprite.Sprite):
             self.rotate(-2)
 
 
+class MazeBlock(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.Surface((40, 40))
+        self.image.fill((0, 250, 35))
+        self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+
+
+class MazeTrash(pygame.sprite.Sprite):
+    def __init__(self, image, pos):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+
+
+class Raccoon(pygame.sprite.Sprite):
+    def __init__(self, image, pos):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+        self.pos_y = pos[1]*40
+        self.speed_y = 0
+        self.gravity_value = 9.8
+
+    def gravity(self):
+        self.speed_y += self.gravity_value/60
+        self.pos_y += self.speed_y
+        self.rect.y = self.pos_y
+
+    def update(self):
+        self.gravity()
+
+
+
 # Levels
-one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 3, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-#spritecollide(sprite, group, dokill, collided = None)
+# Not Sure Yet
+blocks = []
 
+x = 0
+y = 0
+for _ in one:
+    if one[x + (y*10)] == 1:
+        blocks.append([x, y])
+
+    if one[x + (y*10)] == 2:
+        raccoon_pos = [x, y]
+
+    if one[x + (y*10)] == 3:
+        trash_pos = [x, y]
+    
+    x += 1
+    if x > 9:
+        x = 0
+        y += 1
 
 # Objects
 maze = MazeSurf()
-block1 = MazeBlock(one)
-raccoon = Player(raccoon_image, maze.rect)
+maze_blocks = pygame.sprite.Group()
+for c in blocks:
+    maze_blocks.add(MazeBlock(c))
+
+trash = pygame.sprite.Group(MazeTrash(trash_image, trash_pos))
+raccoon = Raccoon(raccoon_image, raccoon_pos)
 sprites = pygame.sprite.Group(maze, raccoon)
-maze_blocks = pygame.sprite.Group(block1)
+
 maze_blocks.draw(maze.image)
+trash.draw(maze.image)
 
 # Game Loop
 while True:
@@ -112,5 +138,8 @@ while True:
     win.fill((255, 255, 255))
     sprites.draw(win)
     sprites.update()
+
+    if pygame.sprite.spritecollide(raccoon, maze_blocks, False, collided = None):
+        raccoon.gravity_value = 0
 
     pygame.display.flip()
