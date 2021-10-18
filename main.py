@@ -61,33 +61,39 @@ class MazeTrash(pygame.sprite.Sprite):
 
 
 class Raccoon(pygame.sprite.Sprite):
-    def __init__(self, image, pos):
+    def __init__(self, image, pos, blocks):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
         self.pos_y = pos[1]*40
-        self.speed_y = 0
-        self.gravity_value = 9.8
+        self.speed_y = 1
+        self.gravity_value = 1
+        self.blocks = blocks
 
     def gravity(self):
         self.speed_y += self.gravity_value/60
         self.pos_y += self.speed_y
         self.rect.y = self.pos_y
 
+    def collide(self):
+        listy = pygame.sprite.spritecollide(self, self.blocks, False, collided = None)
+        print(listy)
+
     def update(self):
         self.gravity()
+        self.collide()
 
 
 
 # Levels
-one = [0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 3, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+one = [0, 1, 0, 0, 0, 0, 0, 0, 0, 2,
+       0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
+       0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
+       0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
+       0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+       0, 1, 0, 0, 3, 0, 0, 0, 0, 1,
+       0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -118,12 +124,13 @@ for c in blocks:
     maze_blocks.add(MazeBlock(c))
 
 trash = pygame.sprite.Group(MazeTrash(trash_image, trash_pos))
-raccoon = Raccoon(raccoon_image, raccoon_pos)
+raccoon = Raccoon(raccoon_image, raccoon_pos, maze_blocks)
 sprites = pygame.sprite.Group(maze, raccoon)
 
 maze_blocks.draw(maze.image)
 trash.draw(maze.image)
 
+print(maze_blocks)
 # Game Loop
 while True:
     clock.tick(60)
@@ -138,8 +145,5 @@ while True:
     win.fill((255, 255, 255))
     sprites.draw(win)
     sprites.update()
-
-    if pygame.sprite.spritecollide(raccoon, maze_blocks, False, collided = None):
-        raccoon.gravity_value = 0
 
     pygame.display.flip()
