@@ -4,13 +4,15 @@
 import pygame
 from sys import exit
 pygame.init()
-win = pygame.display.set_mode((700, 600), pygame.RESIZABLE)
+WIN = pygame.display.set_mode((700, 600), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
-clock = pygame.time.Clock()
+CLOCK = pygame.time.Clock()
 
 # Sprite Art
-raccoon_image = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (40, 40))
-trash_image = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
+raccoon_load = pygame.image.load("assets/raccoon.png")
+trash_load = pygame.image.load("assets/trash.png")
+RACCOON_IMAGE = pygame.transform.scale(raccoon_load, (40, 40))
+TRASH_IMAGE = pygame.transform.scale(trash_load, (40, 40))
 
 # Classes
 
@@ -76,7 +78,7 @@ class Raccoon(pygame.sprite.Sprite):
         self.rect.y = self.pos_y
 
     def collide(self):
-        listy = pygame.sprite.spritecollide(self, self.blocks, False, collided = None)
+        listy = pygame.sprite.spritecollide(self, self.blocks, False)
         print(listy)
 
     def update(self):
@@ -84,26 +86,30 @@ class Raccoon(pygame.sprite.Sprite):
         self.collide()
 
 
-
 # Levels
-one = [0, 1, 0, 0, 0, 0, 0, 0, 0, 2,
-       0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
-       0, 1, 0, 0, 0, 0, 0, 0, 1, 0,
-       0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
-       0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-       0, 1, 0, 0, 3, 0, 0, 0, 0, 1,
-       0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-       0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+one = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 3, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ]
 
 # Not Sure Yet
+
+
 blocks = []
 
 x = 0
 y = 0
 for _ in one:
     if one[x + (y*10)] == 1:
+
         blocks.append([x, y])
 
     if one[x + (y*10)] == 2:
@@ -117,14 +123,15 @@ for _ in one:
         x = 0
         y += 1
 
+
 # Objects
 maze = MazeSurf()
 maze_blocks = pygame.sprite.Group()
 for c in blocks:
     maze_blocks.add(MazeBlock(c))
 
-trash = pygame.sprite.Group(MazeTrash(trash_image, trash_pos))
-raccoon = Raccoon(raccoon_image, raccoon_pos, maze_blocks)
+trash = pygame.sprite.Group(MazeTrash(TRASH_IMAGE, trash_pos))
+raccoon = Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks)
 sprites = pygame.sprite.Group(maze, raccoon)
 
 maze_blocks.draw(maze.image)
@@ -133,7 +140,7 @@ trash.draw(maze.image)
 print(maze_blocks)
 # Game Loop
 while True:
-    clock.tick(60)
+    CLOCK.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -142,8 +149,8 @@ while True:
             maze.win_center = [win.get_width()/2, win.get_height()/2]
             maze.recenter()
 
-    win.fill((255, 255, 255))
-    sprites.draw(win)
+    WIN.fill((255, 255, 255))
+    sprites.draw(WIN)
     sprites.update()
 
     pygame.display.flip()
