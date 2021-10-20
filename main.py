@@ -53,6 +53,7 @@ class MazeBlock(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 40))
         self.image.fill((0, 250, 35))
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class MazeTrash(pygame.sprite.Sprite):
@@ -60,6 +61,7 @@ class MazeTrash(pygame.sprite.Sprite):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class Raccoon(pygame.sprite.Sprite):
@@ -67,6 +69,7 @@ class Raccoon(pygame.sprite.Sprite):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+        self.mask = self.mask = pygame.mask.from_surface(self.image) 
         self.pos_y = pos[1]*40
         self.speed_y = 1
         self.gravity_value = 1
@@ -78,8 +81,8 @@ class Raccoon(pygame.sprite.Sprite):
         self.rect.y = self.pos_y
 
     def collide(self):
-        listy = pygame.sprite.spritecollide(self, self.blocks, False)
-        print(listy)
+        if pygame.sprite.spritecollide(self, self.blocks, False, pygame.sprite.collide_mask):
+            print("boop")
 
     def update(self):
         self.gravity()
@@ -92,7 +95,7 @@ one = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
     0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 1, 0, 3, 0, 0, 0, 0, 0,
     0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
@@ -137,7 +140,6 @@ sprites = pygame.sprite.Group(maze, raccoon)
 maze_blocks.draw(maze.image)
 trash.draw(maze.image)
 
-print(maze_blocks)
 # Game Loop
 while True:
     CLOCK.tick(60)
