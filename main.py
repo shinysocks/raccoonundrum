@@ -60,7 +60,6 @@ class MazeBlock(pygame.sprite.Sprite):
         print(self.mask)
 
 
-
 class MazeTrash(pygame.sprite.Sprite):
     def __init__(self, image, pos):
         super().__init__()
@@ -154,7 +153,7 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.VIDEORESIZE:
-            maze.win_center = [win.get_width()/2, win.get_height()/2]
+            maze.win_center = [WIN.get_width()/2, WIN.get_height()/2]
             maze.recenter()
 
     WIN.fill((255, 255, 255))
