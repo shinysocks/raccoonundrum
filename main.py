@@ -57,7 +57,6 @@ class MazeBlock(pygame.sprite.Sprite):
 
     def update(self):
         self.mask = pygame.mask.from_surface(self.image)
-        print(self.mask)
 
 
 class MazeTrash(pygame.sprite.Sprite):
@@ -76,7 +75,8 @@ class Raccoon(pygame.sprite.Sprite):
         self.mask = self.mask = pygame.mask.from_surface(self.image) 
         self.pos_y = pos[1]*40
         self.speed_y = 1
-        self.gravity_value = 1
+        self,speed_x = 0
+        self.gravity_value = 3
         self.blocks = blocks
 
     def gravity(self):
@@ -86,8 +86,8 @@ class Raccoon(pygame.sprite.Sprite):
 
     def collide(self):
         if pygame.sprite.spritecollide(self, self.blocks, False, pygame.sprite.collide_mask):
-            pass
-            # print("boop")
+            self.speed_y = 0
+            self.gravity_value = 0
 
     def update(self):
         self.gravity()
@@ -96,16 +96,16 @@ class Raccoon(pygame.sprite.Sprite):
 
 # Levels
 one = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 3, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ]
 
 # Not Sure Yet
@@ -139,8 +139,8 @@ for c in blocks:
     maze_blocks.add(MazeBlock(c))
 
 trash = pygame.sprite.Group(MazeTrash(TRASH_IMAGE, trash_pos))
-raccoon = Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks)
-sprites = pygame.sprite.Group(maze, raccoon)
+raccoon = pygame.sprite.Group(Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks))
+mazegrp = pygame.sprite.Group(maze)
 
 maze_blocks.draw(maze.image)
 trash.draw(maze.image)
@@ -157,8 +157,12 @@ while True:
             maze.recenter()
 
     WIN.fill((255, 255, 255))
-    sprites.draw(WIN)
+
+    mazegrp.draw(WIN)
+    raccoon.draw(maze.image)
+    maze.update()
+    raccoon.update()
     maze_blocks.update()
-    sprites.update()
+    trash.update()
 
     pygame.display.flip()
