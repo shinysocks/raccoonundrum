@@ -70,21 +70,14 @@ class Raccoon(pygame.sprite.Sprite):
         if keys[pygame.K_a]:
             self.rect.x -= self.movement
 
-    def collisions(self):
-        self.movement = 2
-        if self.rect.right > 400:
-            self.rect.right = 400
-        if self.rect.bottom > 400:
-            self.rect.bottom = 400
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.top < 0:
-            self.rect.top = 0
+    def collisions(self): # shorten
+        """make it so when the thing collides the side it collides with = the side on the rect of the block"""
 
-        if pygame.sprite.spritecollide(self, self.blocks, False): # block
+        if pygame.sprite.spritecollide(self, self.blocks, False):
             self.movement = 0
 
-        if pygame.sprite.spritecollide(self, self.trash, False): # trash
+        if pygame.sprite.spritecollide(self, self.trash, False):
+            self.movement = 0
             print("you win")
 
     def update(self):
