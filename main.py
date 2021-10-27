@@ -30,7 +30,7 @@ class MazeSurf(pygame.sprite.Sprite):
 
     def update(self):
         self.image.fill((0, 60, 100))
-        self.rect.top += 1
+        self.rect.top += 0
 
 
 class MazeBlock(pygame.sprite.Sprite):
@@ -50,12 +50,13 @@ class MazeTrash(pygame.sprite.Sprite):
 
 
 class Raccoon(pygame.sprite.Sprite):
-    def __init__(self, image, start_pos, blocks):
+    def __init__(self, image, start_pos, blocks, trash):
         super().__init__()
         self.image = image
         self.pos = start_pos
         self.rect = self.image.get_rect(topleft=(self.pos[0]*40, self.pos[1]*40))
         self.blocks = blocks
+        self.trash = trash
         self.movement = 2
 
     def move(self):
@@ -80,8 +81,11 @@ class Raccoon(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
-        if pygame.sprite.spritecollide(self, self.blocks, False):
+        if pygame.sprite.spritecollide(self, self.blocks, False): # block
             self.movement = 0
+
+        if pygame.sprite.spritecollide(self, self.trash, False): # trash
+            print("you win")
 
     def update(self):
         self.move()
@@ -126,13 +130,11 @@ for _ in one:
 # Objects
 maze = MazeSurf()
 mazegrp = pygame.sprite.GroupSingle(maze)
-trash = MazeTrash(TRASH_IMAGE, trash_pos)
+trash = pygame.sprite.GroupSingle(MazeTrash(TRASH_IMAGE, trash_pos))
 maze_blocks = pygame.sprite.Group()
 for c in blocks_list:
     maze_blocks.add(MazeBlock(c))
-
-raccoon = Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks)
-maze_objs = pygame.sprite.Group(trash, raccoon)
+raccoon = pygame.sprite.Group(Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks, trash))
 
 # Game Loop
 while True:
@@ -149,8 +151,11 @@ while True:
 
     mazegrp.draw(WIN)
     mazegrp.update()
+    trash.draw(maze.image)
     maze_blocks.draw(maze.image)
-    maze_objs.draw(maze.image)
-    maze_objs.update()
+    raccoon.draw(maze.image)
+
+
+    raccoon.update()
 
     pygame.display.flip()
