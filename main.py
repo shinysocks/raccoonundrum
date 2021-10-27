@@ -4,7 +4,7 @@
 import pygame
 from sys import exit
 pygame.init()
-WIN = pygame.display.set_mode((700, 600), pygame.RESIZABLE)
+WIN = pygame.display.set_mode((700, 850), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
 CLOCK = pygame.time.Clock()
 
@@ -20,31 +20,17 @@ TRASH_IMAGE = pygame.transform.scale(trash_load, (40, 40))
 class MazeSurf(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.first_image = pygame.Surface((400, 400), pygame.SRCALPHA)
-        self.image = self.first_image
-        self.image.fill((200, 100, 39))
-        self.win_center = [350, 300]
-        self.rect = self.image.get_rect(center=self.win_center)
-        self.angle = 0
+        self.image = pygame.Surface((400, 400))
+        self.image.fill((0, 60, 100))
+        self.win_center = [350, 0]
+        self.rect = self.image.get_rect(midtop=self.win_center)
 
     def recenter(self):
-        self.rect = self.image.get_rect(center=self.win_center)
-
-    def rotate(self, angle):
-        self.image = pygame.transform.rotozoom(self.first_image, self.angle, 1)
-        self.angle += angle
-        if self.angle < 0:
-            self.angle = 360
-        if self.angle > 360:
-            self.angle = 0
-        self.recenter()
+        self.rect = self.image.get_rect(midtop=self.win_center)
 
     def update(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_a]:
-            self.rotate(2)
-        if key[pygame.K_d]:
-            self.rotate(-2)
+        self.image.fill((0, 60, 100))
+        self.rect.top += 1
 
 
 class MazeBlock(pygame.sprite.Sprite):
@@ -53,10 +39,6 @@ class MazeBlock(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 40))
         self.image.fill((0, 250, 35))
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
-        self.mask = pygame.mask.from_surface(self.image)
-
-    def update(self):
-        self.mask = pygame.mask.from_surface(self.image)
 
 
 class MazeTrash(pygame.sprite.Sprite):
@@ -68,82 +50,89 @@ class MazeTrash(pygame.sprite.Sprite):
 
 
 class Raccoon(pygame.sprite.Sprite):
-    def __init__(self, image, pos, blocks):
+    def __init__(self, image, start_pos, blocks):
         super().__init__()
         self.image = image
-        self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
-        self.mask = self.mask = pygame.mask.from_surface(self.image) 
-        self.pos_y = pos[1]*40
-        self.speed_y = 1
-        self,speed_x = 0
-        self.gravity_value = 3
+        self.pos = start_pos
+        self.rect = self.image.get_rect(topleft=(self.pos[0]*40, self.pos[1]*40))
         self.blocks = blocks
+        self.movement = 2
 
-    def gravity(self):
-        self.speed_y += self.gravity_value/60
-        self.pos_y += self.speed_y
-        self.rect.y = self.pos_y
+    def move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            self.rect.y -= self.movement
+        if keys[pygame.K_s]:
+            self.rect.y += self.movement
+        if keys[pygame.K_d]:
+            self.rect.x += self.movement
+        if keys[pygame.K_a]:
+            self.rect.x -= self.movement
 
-    def collide(self):
-        if pygame.sprite.spritecollide(self, self.blocks, False, pygame.sprite.collide_mask):
-            self.speed_y = 0
-            self.gravity_value = 0
+    def collisions(self):
+        self.movement = 2
+        if self.rect.right > 400:
+            self.rect.right = 400
+        if self.rect.bottom > 400:
+            self.rect.bottom = 400
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.top < 0:
+            self.rect.top = 0
+
+        if pygame.sprite.spritecollide(self, self.blocks, False):
+            self.movement = 0
 
     def update(self):
-        self.gravity()
-        self.collide()
+        self.move()
+        self.collisions()
 
 
-# Levels
+# Eventual Level design
 one = [
-    0, 0, 0, 0, 0, 0, 0, 1, 0, 2,
-    0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 2
     ]
 
-# Not Sure Yet
-
-
-blocks = []
-
+blocks_list = []
+raccoon_pos = []
+trash_pos = []
 x = 0
 y = 0
 for _ in one:
     if one[x + (y*10)] == 1:
 
-        blocks.append([x, y])
+        blocks_list.append([x, y])
 
     if one[x + (y*10)] == 2:
         raccoon_pos = [x, y]
 
     if one[x + (y*10)] == 3:
         trash_pos = [x, y]
-    
+
     x += 1
     if x > 9:
         x = 0
         y += 1
 
-
 # Objects
 maze = MazeSurf()
+mazegrp = pygame.sprite.GroupSingle(maze)
+trash = MazeTrash(TRASH_IMAGE, trash_pos)
 maze_blocks = pygame.sprite.Group()
-for c in blocks:
+for c in blocks_list:
     maze_blocks.add(MazeBlock(c))
 
-trash = pygame.sprite.Group(MazeTrash(TRASH_IMAGE, trash_pos))
-raccoon = pygame.sprite.Group(Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks))
-mazegrp = pygame.sprite.Group(maze)
-
-maze_blocks.draw(maze.image)
-trash.draw(maze.image)
+raccoon = Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks)
+maze_objs = pygame.sprite.Group(trash, raccoon)
 
 # Game Loop
 while True:
@@ -153,16 +142,15 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.VIDEORESIZE:
-            maze.win_center = [WIN.get_width()/2, WIN.get_height()/2]
+            maze.win_center[0] = WIN.get_width()/2
             maze.recenter()
 
     WIN.fill((255, 255, 255))
 
     mazegrp.draw(WIN)
-    raccoon.draw(maze.image)
-    maze.update()
-    raccoon.update()
-    maze_blocks.update()
-    trash.update()
+    mazegrp.update()
+    maze_blocks.draw(maze.image)
+    maze_objs.draw(maze.image)
+    maze_objs.update()
 
     pygame.display.flip()
