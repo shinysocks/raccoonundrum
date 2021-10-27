@@ -6,11 +6,17 @@ from sys import exit
 pygame.init()
 WIN = pygame.display.set_mode((700, 850), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
+
+# Constants
 CLOCK = pygame.time.Clock()
+CENTER = [350, 0]
 
 # Sprite Art
+maze_load = pygame.image.load("assets/maze.png")
 raccoon_load = pygame.image.load("assets/raccoon.png")
 trash_load = pygame.image.load("assets/trash.png")
+
+MAZE_IMAGE = pygame.transform.scale(trash_load, (400, 400))
 RACCOON_IMAGE = pygame.transform.scale(raccoon_load, (40, 40))
 TRASH_IMAGE = pygame.transform.scale(trash_load, (40, 40))
 
@@ -20,16 +26,14 @@ TRASH_IMAGE = pygame.transform.scale(trash_load, (40, 40))
 class MazeSurf(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((400, 400))
-        self.image.fill((0, 60, 100))
-        self.win_center = [350, 0]
-        self.rect = self.image.get_rect(midtop=self.win_center)
+        self.image = MAZE_IMAGE
+        self.rect = self.image.get_rect(midtop=CENTER)
 
     def recenter(self):
-        self.rect = self.image.get_rect(midtop=self.win_center)
+        self.rect = self.image.get_rect(midtop=CENTER)
 
     def update(self):
-        self.image.fill((0, 60, 100))
+        self.image.fill((0, 60, 100)) # all image.fills are temporary
         self.rect.top += 0
 
 
@@ -39,23 +43,24 @@ class MazeBlock(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 40))
         self.image.fill((0, 250, 35))
         self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
-
+    
 
 class MazeTrash(pygame.sprite.Sprite):
-    def __init__(self, image, pos):
+    def __init__(self, pos):
         super().__init__()
-        self.image = image
-        self.rect = self.image.get_rect(topleft=(pos[0]*40, pos[1]*40))
+        self.image = TRASH_IMAGE
+        self.rect = pygame.Rect(pos[0]*40, pos[0]*40, 25, 25)
         self.mask = pygame.mask.from_surface(self.image)
 
 
 class Raccoon(pygame.sprite.Sprite):
-    def __init__(self, image, start_pos, blocks, trash):
+    def __init__(self, start_pos, blocks, block_rect, trash):
         super().__init__()
-        self.image = image
+        self.image = RACCOON_IMAGE
         self.pos = start_pos
         self.rect = self.image.get_rect(topleft=(self.pos[0]*40, self.pos[1]*40))
         self.blocks = blocks
+        self.block_rect = block_rect
         self.trash = trash
         self.movement = 2
 
@@ -72,6 +77,15 @@ class Raccoon(pygame.sprite.Sprite):
 
     def collisions(self): # shorten
         """make it so when the thing collides the side it collides with = the side on the rect of the block"""
+        self.movement = 2
+        if self.rect.right > 400:
+            self.rect.right = 400
+        if self.rect.bottom > 400:
+            self.rect.bottom = 400
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.top < 0:
+            self.rect.top = 0
 
         if pygame.sprite.spritecollide(self, self.blocks, False):
             self.movement = 0
@@ -93,7 +107,7 @@ one = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 3, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 3, 0, 0, 0, 0, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 2
@@ -106,7 +120,6 @@ x = 0
 y = 0
 for _ in one:
     if one[x + (y*10)] == 1:
-
         blocks_list.append([x, y])
 
     if one[x + (y*10)] == 2:
@@ -123,11 +136,11 @@ for _ in one:
 # Objects
 maze = MazeSurf()
 mazegrp = pygame.sprite.GroupSingle(maze)
-trash = pygame.sprite.GroupSingle(MazeTrash(TRASH_IMAGE, trash_pos))
+trash = pygame.sprite.GroupSingle(MazeTrash(trash_pos))
 maze_blocks = pygame.sprite.Group()
 for c in blocks_list:
     maze_blocks.add(MazeBlock(c))
-raccoon = pygame.sprite.Group(Raccoon(RACCOON_IMAGE, raccoon_pos, maze_blocks, trash))
+raccoon = pygame.sprite.Group(Raccoon(raccoon_pos, maze_blocks, MazeBlock(c), trash))
 
 # Game Loop
 while True:
@@ -137,7 +150,7 @@ while True:
             pygame.quit()
             exit()
         elif event.type == pygame.VIDEORESIZE:
-            maze.win_center[0] = WIN.get_width()/2
+            CENTER[0] = WIN.get_width()/2
             maze.recenter()
 
     WIN.fill((255, 255, 255))
@@ -147,8 +160,6 @@ while True:
     trash.draw(maze.image)
     maze_blocks.draw(maze.image)
     raccoon.draw(maze.image)
-
-
     raccoon.update()
 
     pygame.display.flip()
