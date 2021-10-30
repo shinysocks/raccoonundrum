@@ -76,7 +76,10 @@ class Raccoon(pygame.sprite.Sprite):
             self.rect.x -= self.movement
 
     def collisions(self): # shorten
-        """make it so when the thing collides the side it collides with = the side on the rect of the block"""
+        if pygame.sprite.spritecollide(self, self.blocks, False):
+
+        
+
         self.movement = 2
         if self.rect.right > 400:
             self.rect.right = 400
@@ -87,11 +90,13 @@ class Raccoon(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
-        if pygame.sprite.spritecollide(self, self.blocks, False):
+        for blocks in hits:
+            
+
             self.movement = 0
+            self.rect.right -= 1
 
         if pygame.sprite.spritecollide(self, self.trash, False):
-            self.movement = 0
             print("you win")
 
     def update(self):
@@ -101,16 +106,16 @@ class Raccoon(pygame.sprite.Sprite):
 
 # Eventual Level design
 one = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 3, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 2
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 1, 3, 1, 0, 0, 0, 1,
+    0, 0, 0, 1, 1, 1, 1, 1, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 2
     ]
 
 blocks_list = []
@@ -140,7 +145,7 @@ trash = pygame.sprite.GroupSingle(MazeTrash(trash_pos))
 maze_blocks = pygame.sprite.Group()
 for c in blocks_list:
     maze_blocks.add(MazeBlock(c))
-raccoon = pygame.sprite.Group(Raccoon(raccoon_pos, maze_blocks, MazeBlock(c), trash))
+raccoon = pygame.sprite.Group(Raccoon(raccoon_pos, maze_blocks, MazeBlock(c).rect, trash))
 
 # Game Loop
 while True:
