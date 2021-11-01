@@ -10,6 +10,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 # Constants
 CLOCK = pygame.time.Clock()
 CENTER = [350, 0]
+FILL = (200, 0, 0)
 
 # Sprite Art
 maze_load = pygame.image.load("assets/block.jpg")
@@ -29,24 +30,24 @@ class MazeSurf(object):
         self.image = MAZE_IMAGE
         self.rect = self.image.get_rect(midtop=CENTER)
 
+    def fill(self, color):
+        self.image.fill((color))
+
     def draw(self, surf):
         surf.blit(self.image, self.rect)
-        self.image.fill((200, 0, 0))  # temporary
 
     def recenter(self):
         self.rect = self.image.get_rect(midtop=CENTER)
 
     def move(self):
-        self.rect.top += 1
+        self.rect.top += 0
 
 
-class Raccoon(object):
+class Raccoon(MazeSurf):
     def __init__(self, pos):
+        super().__init__()
         self.image = RACCOON_IMAGE
         self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 30, 30)
-
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
 
     def move_collide(self, vel_x, vel_y):
         self.rect.x += vel_x
@@ -76,23 +77,19 @@ class Raccoon(object):
             print("boop")
 
 
-class MazeBlock(object):
+class MazeBlock(MazeSurf):
     def __init__(self, pos):
+        super().__init__()
         blocks.append(self)
         self.image = BLOCK_IMAGE
         self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 40, 40)
 
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
 
-
-class MazeTrash(object):
+class MazeTrash(MazeSurf):
     def __init__(self, pos):
+        super().__init__()
         self.image = TRASH_IMAGE
         self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 40, 40)
-
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
 
 
 # Eventual Level design
@@ -125,6 +122,7 @@ two = [
 blocks = []
 raccoon_pos = []
 trash_pos = []
+
 x = 0
 y = 0
 for _ in one:
@@ -172,6 +170,7 @@ while True:
 
     WIN.fill((255, 255, 255))
     maze.draw(WIN)
+    maze.fill(FILL)
     for b in blocks:
         b.draw(maze.image)
     raccoon.draw(maze.image)
