@@ -3,23 +3,21 @@
 # Initial Setup
 import pygame
 from sys import exit
+from time import sleep
 pygame.init()
-WIN = pygame.display.set_mode((700, 850), pygame.RESIZABLE)
+WIN = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
 pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
 CLOCK = pygame.time.Clock()
-CENTER = [350, 0]
 FILL = (200, 0, 0)
 BLOCKS = []
-RACCOON_POS = []
-TRASH_POS = []
-TITLE = True
+CUBE_SIZE = WIN.get_width()/10
 
 # Sprite Art
 MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (400, 400))
 BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (40, 40))
-RACCOON_IMAGE = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (30, 30))
+RACCOON_IMAGE = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (36, 32))
 TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
 
 
@@ -27,7 +25,7 @@ TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40,
 class MazeSurf(object):
     def __init__(self):
         self.image = MAZE_IMAGE
-        self.rect = self.image.get_rect(midtop=CENTER)
+        self.rect = self.image.get_rect()
 
     def fill(self, color):
         self.image.fill((color))
@@ -46,7 +44,7 @@ class Raccoon(MazeSurf):
     def __init__(self, pos):
         super().__init__()
         self.image = RACCOON_IMAGE
-        self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 30, 30)
+        self.rect = pygame.Rect(pos[0]*CUBE_SIZE, pos[1]*CUBE_SIZE, 36, 32)
 
     def move_collide(self, vel_x, vel_y):
         self.rect.x += vel_x
@@ -73,7 +71,7 @@ class Raccoon(MazeSurf):
                     self.rect.top = block.rect.bottom
 
         if self.rect.colliderect(trash.rect):
-            print("boop")
+            level.levelup()
 
 
 class MazeBlock(MazeSurf):
@@ -81,54 +79,101 @@ class MazeBlock(MazeSurf):
         super().__init__()
         BLOCKS.append(self)
         self.image = BLOCK_IMAGE
-        self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 40, 40)
+        self.rect = pygame.Rect(pos[0]*CUBE_SIZE, pos[1]*CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
 
 
 class MazeTrash(MazeSurf):
     def __init__(self, pos):
         super().__init__()
         self.image = TRASH_IMAGE
-        self.rect = pygame.Rect(pos[0]*40, pos[1]*40, 40, 40)
+        self.rect = pygame.Rect(pos[0]*CUBE_SIZE, pos[1]*CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
 
 
 # Eventual Level design
-one = [
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-    1, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 0, 0, 1, 3, 0, 1, 1, 1, 1,
-    1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
-    1, 0, 1, 0, 1, 0, 0, 0, 0, 0,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 2
-    ]
+class Level(object):
+    def __init__(self):
+        self.TRASH_POS = []
+        self.RACCOON_POS = []
+        self.levelnum = 0
+        self.levels = {  # re-format
+                1 : (
+                    0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
+                    1, 0, 1, 0, 0, 0, 0, 1, 1, 0,
+                    1, 0, 1, 0, 0, 0, 0, 0, 1, 1,
+                    1, 0, 1, 1, 0, 1, 0, 0, 0, 1,
+                    1, 0, 0, 1, 3, 1, 1, 1, 1, 1,
+                    1, 0, 0, 1, 1, 0, 0, 1, 0, 1,
+                    1, 0, 0, 1, 0, 0, 0, 0, 0, 1,
+                    1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 0, 0, 0, 3, 0, 0, 2
+                    ),
 
-x = 0
-y = 0
-for _ in one:
-    if one[x + (y*10)] == 1:
-        MazeBlock((x, y))
+                2 : (
+                    3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+                    ),
 
-    if one[x + (y*10)] == 2:
-        RACCOON_POS = [x, y]
+                3 : (
+                    3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 2
+                    )
+                    }
 
-    if one[x + (y*10)] == 3:
-        TRASH_POS = [x, y]
-
-    x += 1
-    if x > 9:
+    def generate(self, level):
+        BLOCKS = []
         x = 0
-        y += 1
+        y = 0
+        for _ in level:
 
+            if level[x + (y*10)] == 1:
+                MazeBlock((x, y))
+
+            if level[x + (y*10)] == 2:
+                self.RACCOON_POS = [x, y]
+
+            if level[x + (y*10)] == 3:
+                self.TRASH_POS = [x, y]
+
+            x += 1
+            if x > 9:
+                x = 0
+                y += 1
+    
+    def levelup(self):
+        WIN.fill((0, 255, 0))
+        pygame.display.flip()
+        sleep(2)
+        self.levelnum += 1
+        self.generate(self.levels[self.levelnum])
+
+        
 
 # Objects
+level = Level()
+level.generate(level.levels[1])
 maze = MazeSurf()
-raccoon = Raccoon(RACCOON_POS)
-trash = MazeTrash(TRASH_POS)
+raccoon = Raccoon(level.RACCOON_POS)
+trash = MazeTrash(level.TRASH_POS)
 
 # Game Loop
+TITLE = True
 while True:
     CLOCK.tick(60)
     for event in pygame.event.get():
@@ -142,29 +187,34 @@ while True:
     # Title Screen
     while TITLE:
         WIN.fill((255, 0, 0))
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            TITLE = False
-            break
         pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.VIDEORESIZE:
+                CENTER[0] = WIN.get_width()/2
+                maze.recenter()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == 13:
+                    TITLE = False
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        raccoon.move_collide(0, -2)
+        raccoon.move_collide(0, -3)
     if keys[pygame.K_s]:
-        raccoon.move_collide(0, 2)
+        raccoon.move_collide(0, 3)
     if keys[pygame.K_d]:
-        raccoon.move_collide(2, 0)
+        raccoon.move_collide(3, 0)
     if keys[pygame.K_a]:
-        raccoon.move_collide(-2, 0)
+        raccoon.move_collide(-3, 0)
 
-    WIN.fill((255, 255, 255))
+    WIN.fill((255, 255, 255, 0))
     maze.draw(WIN)
     maze.fill(FILL)
     for b in BLOCKS:
         b.draw(maze.image)
     raccoon.draw(maze.image)
     trash.draw(maze.image)
-    maze.move()
 
     pygame.display.flip()
