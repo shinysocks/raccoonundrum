@@ -5,7 +5,7 @@ import pygame
 from sys import exit
 from time import sleep
 pygame.init()
-WIN = pygame.display.set_mode((400, 400), pygame.RESIZABLE)
+WIN = pygame.display.set_mode((400, 400))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
@@ -19,6 +19,7 @@ MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (400,
 BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (40, 40))
 RACCOON_IMAGE = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (36, 32))
 TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
+ENEMY_IMAGE = pygame.transform.scale(pygame.image.load("assets/enemy.png"), (40, 40))
 
 
 # Classes
@@ -32,12 +33,6 @@ class MazeSurf(object):
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
-
-    def recenter(self):
-        self.rect = self.image.get_rect(midtop=CENTER)
-
-    def move(self):
-        self.rect.top += 0
 
 
 class Raccoon(MazeSurf):
@@ -89,15 +84,23 @@ class MazeTrash(MazeSurf):
         self.rect = pygame.Rect(pos[0]*CUBE_SIZE, pos[1]*CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
 
 
+class MazeEnemy(MazeSurf):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = ENEMY_IMAGE
+        self.rect = pygame.Rect(pos[0]*CUBE_SIZE, pos[1]*CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
+
+    def move(self):
+        pass
+
+
 # Eventual Level design
 class Level(object):
     def __init__(self):
-        self.TRASH_POS = []
-        self.RACCOON_POS = []
-        self.levelnum = 0
+        self.levelnum = 1
         self.levels = {  # re-format
                 1 : (
-                    0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
+                    4, 0, 0, 0, 0, 0, 1, 1, 0, 1,
                     1, 0, 1, 0, 0, 0, 0, 1, 1, 0,
                     1, 0, 1, 0, 0, 0, 0, 0, 1, 1,
                     1, 0, 1, 1, 0, 1, 0, 0, 0, 1,
@@ -110,46 +113,49 @@ class Level(object):
                     ),
 
                 2 : (
-                    3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+                    3, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    0, 0, 1, 1, 1, 0, 0, 0, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                    1, 1, 1, 1, 0, 0, 0, 0, 1, 0,
+                    1, 0, 0, 1, 0, 0, 0, 0, 1, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+                    0, 1, 1, 1, 0, 0, 0, 1, 1, 0,
+                    0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1, 1, 2
                     ),
 
                 3 : (
-                    3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+                    3, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 1, 1, 1, 1, 1, 0, 1, 1, 1,
+                    0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+                    0, 0, 1, 0, 0, 1, 0, 0, 0, 1,
+                    0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
+                    0, 1, 1, 0, 1, 1, 1, 1, 1, 1,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                     0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
                     0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 2
+                    0, 1, 0, 0, 0, 0, 0, 0, 0, 2
                     )
                     }
 
     def generate(self, level):
+        global BLOCKS, TITLE, raccoon, trash, enemy # fix eventually
         BLOCKS = []
         x = 0
         y = 0
         for _ in level:
-
             if level[x + (y*10)] == 1:
                 MazeBlock((x, y))
 
             if level[x + (y*10)] == 2:
-                self.RACCOON_POS = [x, y]
+                raccoon = Raccoon([x, y])
 
             if level[x + (y*10)] == 3:
-                self.TRASH_POS = [x, y]
+                trash = MazeTrash([x, y])
+
+            if level[x + (y*10)] == 4:
+                enemy = MazeEnemy([x, y])
 
             x += 1
             if x > 9:
@@ -161,16 +167,22 @@ class Level(object):
         pygame.display.flip()
         sleep(2)
         self.levelnum += 1
-        self.generate(self.levels[self.levelnum])
+        try:
+            self.generate(self.levels[self.levelnum])
+        except KeyError:
+            print("won")
+            WIN.fill((0, 0, 0))
+            pygame.display.flip()
+            sleep(3)
+            TITLE = True
+            self.levelnum = 1
+            self.generate(self.levels[self.levelnum])
 
-        
 
 # Objects
 level = Level()
 level.generate(level.levels[1])
 maze = MazeSurf()
-raccoon = Raccoon(level.RACCOON_POS)
-trash = MazeTrash(level.TRASH_POS)
 
 # Game Loop
 TITLE = True
@@ -216,5 +228,6 @@ while True:
         b.draw(maze.image)
     raccoon.draw(maze.image)
     trash.draw(maze.image)
+    enemy.draw(maze.image)
 
     pygame.display.flip()
