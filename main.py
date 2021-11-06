@@ -1,4 +1,4 @@
- # DEDICATED TO EMILY
+# DEDICATED TO EMILY
 
 # Initial Setup
 import pygame
@@ -30,7 +30,7 @@ class MazeSurf(object):
         self.rect = self.image.get_rect()
 
     def fill(self, color):
-        self.image.fill((color))
+        self.image.fill(color)
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
@@ -68,7 +68,7 @@ class Raccoon(MazeSurf):
 
     def collide(self):
         if self.rect.colliderect(trash.rect):
-            level.levelup()
+            level.lev_up()
         for enemy in ENEMIES:
             if self.rect.colliderect(enemy.rect):
                 level.restart()
@@ -116,9 +116,11 @@ class MazeEnemy(MazeSurf):
             
 class Level(object):
     def __init__(self):
-        self.levelnum = 1
+        self.level_num = 1
+        self.blocks = BLOCKS
+        self.enemies = ENEMIES
         self.levels = {
-                1 : ( 
+                1: (
                     0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0,
                     1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0,
                     1, 0, 1, 0, 4, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
@@ -137,23 +139,23 @@ class Level(object):
                     )
                     }
 
-    def generate(self, level, blocks, enemies):
-        global raccoon, trash # fix
-        blocks = []
-        enemies = []
+    def generate(self, lev_list):
+        global raccoon, trash
+        self.blocks.clear()
+        self.enemies.clear()
         x = 0
         y = 0
-        for _ in level:
-            if level[x + (y*15)] == 1:
+        for _ in lev_list:
+            if lev_list[x + (y*15)] == 1:
                 MazeBlock((x, y))
 
-            if level[x + (y*15)] == 2:
+            if lev_list[x + (y*15)] == 2:
                 raccoon = Raccoon([x, y])
 
-            if level[x + (y*15)] == 3:
+            if lev_list[x + (y*15)] == 3:
                 trash = MazeTrash([x, y])
 
-            if level[x + (y*15)] == 4:
+            if lev_list[x + (y*15)] == 4:
                 MazeEnemy([x, y])
 
             x += 1
@@ -161,13 +163,13 @@ class Level(object):
                 x = 0
                 y += 1
     
-    def levelup(self):
+    def lev_up(self):
         WIN.fill((0, 255, 0))
         pygame.display.flip()
         sleep(2)
-        self.levelnum += 1
+        self.level_num += 1
         try:
-            self.generate(self.levels[self.levelnum], BLOCKS, ENEMIES)
+            self.generate(self.levels[self.level_num])
         except KeyError:
             WIN.fill((0, 0, 0))
             pygame.display.flip()
@@ -175,13 +177,13 @@ class Level(object):
             exit()
 
     def restart(self):
-        self.generate(self.levels[self.levelnum], BLOCKS, ENEMIES)
+        self.generate(self.levels[self.level_num])
 
 
 # Objects
 level = Level()
 maze = MazeSurf()
-level.generate(level.levels[1], BLOCKS, ENEMIES)
+level.generate(level.levels[1])
 
 # Game Loop
 TITLE = True
@@ -191,9 +193,6 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.VIDEORESIZE:
-            CENTER[0] = WIN.get_width()/2
-            maze.recenter()
 
     # Title Screen
     while TITLE:
@@ -203,9 +202,6 @@ while True:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            elif event.type == pygame.VIDEORESIZE:
-                CENTER[0] = WIN.get_width()/2
-                maze.recenter()
             elif event.type == pygame.KEYDOWN:
                 if event.key == 13:
                     TITLE = False
