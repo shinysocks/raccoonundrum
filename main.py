@@ -11,8 +11,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 # Constants
 CLOCK = pygame.time.Clock()
 FILL = (200, 0, 0)
-BLOCKS = []
-ENEMIES = []
+BLOCKS, ENEMIES = [], []
 CUBE_SIZE = 40
 
 # Sprite Art
@@ -104,14 +103,15 @@ class MazeEnemy(MazeSurf):
         if self.rect.left <= 0:
             self.vel_x = 6
 
-        for block in BLOCKS:
+        for block in BLOCKS:  # WHY DOESN'T IT WORK
             if self.rect.colliderect(block.rect):
                 if self.vel_x > 0:
                     self.rect.left = block.rect.right
                     self.vel_x = 6
+
                 if self.vel_x < 0:
                     self.rect.right = block.rect.left
-                    self.vel_x = -6  
+                    self.vel_x = -6
 
             
 class Level(object):
@@ -119,17 +119,19 @@ class Level(object):
         self.level_num = 1
         self.blocks = BLOCKS
         self.enemies = ENEMIES
+        self.raccoon = raccoon
+        self.trash = trash
         self.levels = {
                 1: (
                     0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0,
                     1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0,
-                    1, 0, 1, 0, 4, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+                    1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0,
                     1, 0, 0, 1, 3, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
                     1, 0, 0, 1, 2, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0,
                     1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0,
                     1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1,
-                    0, 1, 4, 0, 0, 0, 0, 1, 0, 4, 1, 1, 1, 0, 0,
+                    0, 1, 0, 0, 0, 0, 0, 1, 0, 4, 1, 1, 1, 0, 0,
                     1, 1, 1, 0, 0, 0, 3, 0, 0, 0, 1, 1, 1, 0, 0,
                     1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1,
                     1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0,
@@ -150,10 +152,10 @@ class Level(object):
                 MazeBlock((x, y))
 
             if lev_list[x + (y*15)] == 2:
-                raccoon = Raccoon([x, y])
+                self.raccoon = Raccoon([x, y])
 
             if lev_list[x + (y*15)] == 3:
-                trash = MazeTrash([x, y])
+                self.trash = MazeTrash([x, y])
 
             if lev_list[x + (y*15)] == 4:
                 MazeEnemy([x, y])
