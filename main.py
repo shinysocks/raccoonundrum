@@ -89,21 +89,33 @@ class MazeTrash(MazeSurf):
 
 
 class MazeEnemy(MazeSurf):
-    def __init__(self, pos):
+    def __init__(self, pos, enemy_type):
         super().__init__()
         ENEMIES.append(self)
         self.image = ENEMY_IMAGE
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, SIZE, SIZE)
-        self.vel_x = 6
+        self.vel = 6
+        self.enemy_type = enemy_type
 
     def move(self):
-        self.rect.x += self.vel_x
+        if self.enemy_type == 1:
+            self.rect.x += self.vel
+
+        if self.enemy_type == 2:
+            self.rect.y += self.vel
+        
         if self.rect.right >= 600 or self.rect.right <= 0:
-            self.vel_x *= -1
+            self.vel *= -1
+
+        if self.rect.bottom >= 600 or self.rect.top <= 0:
+            self.vel *= -1
 
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
-                    self.vel_x *= -1
+                    self.vel *= -1
+        
+        if self.rect.colliderect(trash.rect):
+                    self.vel *= -1
 
             
 class Level(object):
@@ -118,7 +130,7 @@ class Level(object):
                     1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 1, 1,
+                    1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
@@ -126,8 +138,8 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1
+                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                     )
                     }
 
@@ -148,7 +160,10 @@ class Level(object):
                 trash = MazeTrash([x, y])
 
             if lev_list[x + (y*15)] == 4:
-                MazeEnemy([x, y])
+                MazeEnemy([x, y], 1)
+
+            if lev_list[x + (y*15)] == 5:
+                MazeEnemy([x, y], 2)
 
             x += 1
             if x > 15:
