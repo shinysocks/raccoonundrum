@@ -5,22 +5,28 @@ import pygame
 from sys import exit
 from time import sleep
 pygame.init()
-WIN = pygame.display.set_mode((600, 600))
+WIN = pygame.display.set_mode((750, 750))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
 CLOCK = pygame.time.Clock()
 FILL = (200, 0, 0)
-BLOCKS, ENEMIES, GEMS = [], [], []
-SIZE = 40
+BLOCKS, ENEMIES, DOORS, GEMS = [], [], [], []
+SIZE = 50
 
 # Sprite Art
-MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (600, 600))
-BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (40, 40))
-RACCOON_IMAGE = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (36, 33))
-TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
-ENEMY_IMAGE = pygame.transform.scale(pygame.image.load("assets/enemy.png"), (40, 40))
-GEM_IMAGE = pygame.transform.scale(pygame.image.load("assets/gem.png"), (40, 40))
+RACCOON_LOAD = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (45, 45))
+MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (750, 750))
+BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (50, 50))
+RACCOON_IMAGES = [
+    pygame.transform.rotate(RACCOON_LOAD, 0),
+    pygame.transform.rotate(RACCOON_LOAD, 90),
+    pygame.transform.rotate(RACCOON_LOAD, 180),
+    pygame.transform.rotate(RACCOON_LOAD, 270)
+    ]
+TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (50, 50))
+ENEMY_IMAGE = pygame.transform.scale(pygame.image.load("assets/enemy.png"), (50, 50))
+GEM_IMAGE = pygame.transform.scale(pygame.image.load("assets/gem.png"), (50, 50))
 
 # Classes
 class MazeSurf(object):
@@ -38,8 +44,8 @@ class MazeSurf(object):
 class Raccoon(MazeSurf):
     def __init__(self, pos):
         super().__init__()
-        self.image = RACCOON_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 36, 33)
+        self.image = RACCOON_IMAGES[0]
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
 
     def move(self, vel_x, vel_y):
         self.rect.x += vel_x
@@ -73,7 +79,8 @@ class Raccoon(MazeSurf):
                 level.restart()
         for gem in GEMS:
             if self.rect.colliderect(gem.rect):
-                gem_block.remove()
+                pass
+                # door.open()
 
 
 class MazeBlock(MazeSurf):
@@ -88,7 +95,7 @@ class MazeTrash(MazeSurf):
     def __init__(self, pos):
         super().__init__()
         self.image = TRASH_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 25, 25)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 35, 35)
 
 
 class MazeEnemy(MazeSurf):
@@ -96,30 +103,29 @@ class MazeEnemy(MazeSurf):
         super().__init__()
         ENEMIES.append(self)
         self.image = ENEMY_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 30, 30)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
         self.vel = 6
         self.enemy_type = enemy_type
 
     def move(self):
         if self.enemy_type == 1:
             self.rect.x += self.vel
-
         if self.enemy_type == 2:
             self.rect.y += self.vel
         
-        if self.rect.right >= 600 or self.rect.right <= 0:
+        if self.rect.right >= 750 or self.rect.right <= 0:
             self.vel *= -1
-
-        if self.rect.bottom >= 600 or self.rect.top <= 0:
+        if self.rect.bottom >= 750 or self.rect.top <= 0:
             self.vel *= -1
 
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
                     self.vel *= -1
-        
+        for door in DOORS:
+            if self.rect.colliderect(door.rect):
+                    self.vel *= -1
         if self.rect.colliderect(trash.rect):
                     self.vel *= -1
-
 
 class MazeGem(MazeSurf):
     def __init__(self, pos):
@@ -127,15 +133,20 @@ class MazeGem(MazeSurf):
         GEMS.append(self)
         self.image = GEM_IMAGE
         self.image.fill((0, 0, 255))
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 25, 25)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
 
 
-class MazeGemBlock(MazeSurf):
-    def __init__(self, pos):
+class MazeDoor(MazeSurf):
+    def __init__(self, pos, door_type):
         super().__init__()
-        GEMS.append(self)
+        DOORS.append(self)
         self.image = BLOCK_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 25, 25)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 50, 50)
+
+    def open(self):
+        for gem in GEMS:
+            if raccoon.rect.colliderect(gem.rect):
+                self.die()
 
             
 class Level(object):
@@ -144,29 +155,30 @@ class Level(object):
         self.blocks = BLOCKS
         self.enemies = ENEMIES
         self.levels = {
-                1: (
+                1: [
                     1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1,
-                    1, 1, 3, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1,
+                    1, 1, 3, -6, 1, 1, 0, 1, 6, 1, 0, 1, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,
-                    1, 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                    ),
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
+                    1, 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    ],
 
-                2: (
+                2: [
                     1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 0, 0, 3, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
@@ -175,16 +187,17 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 2, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 3, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                    )
+                    1, 1, 1, 1, 1, 1, 2, 5, 0, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    ]
                     }
 
     def generate(self, lev_list):
-        global raccoon, trash, gem
+        global raccoon, trash, door, gem
         self.blocks.clear()
         self.enemies.clear()
         x = 0
@@ -206,7 +219,23 @@ class Level(object):
                 MazeEnemy([x, y], 2)
 
             if lev_list[x + (y*15)] == 6:
-                MazeGem([x, y])
+                MazeKey([x, y])
+
+            if lev_list[x + (y*15)] == -6:
+                MazeDoor([x, y])
+
+            if lev_list[x + (y*15)] == 7:
+                MazeKey([x, y])
+
+            if lev_list[x + (y*15)] == -7:
+                MazeDoor([x, y])
+
+            if lev_list[x + (y*15)] == 8:
+                MazeKey([x, y])
+
+            if lev_list[x + (y*15)] == -8:
+                MazeDoor([x, y])
+
 
             x += 1
             if x > 15:
@@ -258,12 +287,16 @@ while True:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] or keys[pygame.K_UP]:
+        raccoon.image = RACCOON_IMAGES[0]
         raccoon.move(0, -3)
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+        raccoon.image = RACCOON_IMAGES[2]
         raccoon.move(0, 3)
     if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+        raccoon.image = RACCOON_IMAGES[1]
         raccoon.move(3, 0)
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+        raccoon.image = RACCOON_IMAGES[3]
         raccoon.move(-3, 0)
 
     WIN.fill((255, 255, 255, 0))
@@ -276,8 +309,8 @@ while True:
         e.draw(maze.image)
         e.move()
 
-    for g in GEMS:
-        g.draw(maze.image)
+    for d in DOORS:
+        d.draw(maze.image)
 
     raccoon.draw(maze.image)
     raccoon.collide()
