@@ -15,7 +15,7 @@ BLOCKS, RATS = [], []
 SIZE = 50
 
 # Sprite Art
-RACCOON_LOAD = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (45, 45))
+RACCOON_LOAD = pygame.transform.scale(pygame.image.load("assets/raccoon.png"), (40, 40))
 MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (750, 750))
 BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (50, 50))
 RACCOON_IMAGES = [
@@ -44,7 +44,7 @@ class MazeSurf(object):
 class Raccoon(object):
     def __init__(self, pos):
         self.image = RACCOON_IMAGES[0]
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
@@ -53,10 +53,10 @@ class Raccoon(object):
         self.rect.x += vel_x
         self.rect.y += vel_y
 
-        if self.rect.right > 600:
-            self.rect.right = 600
-        if self.rect.bottom > 600:
-            self.rect.bottom = 600
+        if self.rect.right > 750:
+            self.rect.right = 750
+        if self.rect.bottom > 750:
+            self.rect.bottom = 750
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.top < 0:
@@ -101,7 +101,7 @@ class MazeRat(MazeSurf):
         super().__init__()
         RATS.append(self)
         self.image = RAT_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 50, 50)
         self.vel = 4
         self.rat_type = rat_type
 
@@ -111,9 +111,9 @@ class MazeRat(MazeSurf):
         if self.rat_type == 2:
             self.rect.y += self.vel
         
-        if self.rect.right >= 750 or self.rect.right <= 0:
+        if self.rect.left >= 750 or self.rect.right <= 0:
             self.vel *= -1
-        if self.rect.bottom >= 750 or self.rect.top <= 0:
+        if self.rect.top >= 750 or self.rect.bottom <= 0:
             self.vel *= -1
 
         for block in BLOCKS:
@@ -143,10 +143,8 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 0, 5, 0, 0, 0, 0, 2, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1
                     ],
 
                 2: [
@@ -164,9 +162,7 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 2, 5, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                     ]
                     }
 
@@ -191,9 +187,9 @@ class Level(object):
 
             if lev_list[x + (y*15)] == 5:
                 MazeRat([x, y], 2)
-
+            
             x += 1
-            if x > 15:
+            if x > 14:
                 x = 0
                 y += 1
     
