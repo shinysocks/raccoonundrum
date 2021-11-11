@@ -11,7 +11,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 # Constants
 CLOCK = pygame.time.Clock()
 FILL = (200, 0, 0)
-BLOCKS, ENEMIES, DOORS, GEMS = [], [], [], []
+BLOCKS, ENEMIES, DOORS, KEYS = [], [], [], []
 SIZE = 50
 
 # Sprite Art
@@ -26,7 +26,8 @@ RACCOON_IMAGES = [
     ]
 TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (50, 50))
 ENEMY_IMAGE = pygame.transform.scale(pygame.image.load("assets/enemy.png"), (50, 50))
-GEM_IMAGE = pygame.transform.scale(pygame.image.load("assets/gem.png"), (50, 50))
+GEM_IMAGE = pygame.transform.scale(pygame.image.load("assets/key.png"), (50, 50))
+
 
 # Classes
 class MazeSurf(object):
@@ -77,18 +78,23 @@ class Raccoon(MazeSurf):
         for enemy in ENEMIES:
             if self.rect.colliderect(enemy.rect):
                 level.restart()
-        for gem in GEMS:
-            if self.rect.colliderect(gem.rect):
-                pass
-                # door.open()
+        for key in KEYS:
+            if self.rect.colliderect(key.rect):
+                for door in DOORS:
+                    door.open()
 
 
 class MazeBlock(MazeSurf):
-    def __init__(self, pos):
+    def __init__(self, pos, is_door):
         super().__init__()
         BLOCKS.append(self)
         self.image = BLOCK_IMAGE
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, SIZE, SIZE)
+        if is_door:
+            print("door")
+
+    def open(self):
+        self.fill(FILL)
 
 
 class MazeTrash(MazeSurf):
@@ -120,33 +126,20 @@ class MazeEnemy(MazeSurf):
 
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
-                    self.vel *= -1
+                self.vel *= -1
         for door in DOORS:
             if self.rect.colliderect(door.rect):
-                    self.vel *= -1
+                self.vel *= -1
         if self.rect.colliderect(trash.rect):
-                    self.vel *= -1
+            self.vel *= -1
 
-class MazeGem(MazeSurf):
+
+class MazeKey(MazeSurf):
     def __init__(self, pos):
         super().__init__()
-        GEMS.append(self)
+        KEYS.append(self)
         self.image = GEM_IMAGE
-        self.image.fill((0, 0, 255))
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
-
-
-class MazeDoor(MazeSurf):
-    def __init__(self, pos, door_type):
-        super().__init__()
-        DOORS.append(self)
-        self.image = BLOCK_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 50, 50)
-
-    def open(self):
-        for gem in GEMS:
-            if raccoon.rect.colliderect(gem.rect):
-                self.die()
 
             
 class Level(object):
@@ -197,14 +190,14 @@ class Level(object):
                     }
 
     def generate(self, lev_list):
-        global raccoon, trash, door, gem
+        global raccoon, trash
         self.blocks.clear()
         self.enemies.clear()
         x = 0
         y = 0
         for _ in lev_list:
             if lev_list[x + (y*15)] == 1:
-                MazeBlock((x, y))
+                MazeBlock((x, y), False)
 
             if lev_list[x + (y*15)] == 2:
                 raccoon = Raccoon([x, y])
@@ -222,20 +215,7 @@ class Level(object):
                 MazeKey([x, y])
 
             if lev_list[x + (y*15)] == -6:
-                MazeDoor([x, y])
-
-            if lev_list[x + (y*15)] == 7:
-                MazeKey([x, y])
-
-            if lev_list[x + (y*15)] == -7:
-                MazeDoor([x, y])
-
-            if lev_list[x + (y*15)] == 8:
-                MazeKey([x, y])
-
-            if lev_list[x + (y*15)] == -8:
-                MazeDoor([x, y])
-
+                MazeBlock([x, y], True)
 
             x += 1
             if x > 15:
@@ -311,6 +291,9 @@ while True:
 
     for d in DOORS:
         d.draw(maze.image)
+
+    for k in KEYS:
+        k.draw(maze.image)
 
     raccoon.draw(maze.image)
     raccoon.collide()
