@@ -11,7 +11,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 # Constants
 CLOCK = pygame.time.Clock()
 FILL = (200, 0, 0)
-BLOCKS, ENEMIES, DOORS, KEYS = [], [], [], []
+BLOCKS, ENEMIES, KEYS = [], [], []
 SIZE = 50
 
 # Sprite Art
@@ -80,8 +80,7 @@ class Raccoon(MazeSurf):
                 level.restart()
         for key in KEYS:
             if self.rect.colliderect(key.rect):
-                for door in DOORS:
-                    door.open()
+                pass
 
 
 class MazeBlock(MazeSurf):
@@ -127,9 +126,6 @@ class MazeEnemy(MazeSurf):
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
-        for door in DOORS:
-            if self.rect.colliderect(door.rect):
-                self.vel *= -1
         if self.rect.colliderect(trash.rect):
             self.vel *= -1
 
@@ -147,17 +143,18 @@ class Level(object):
         self.level_num = 1
         self.blocks = BLOCKS
         self.enemies = ENEMIES
+        self.keys = KEYS
         self.levels = {
                 1: [
                     1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1,
-                    1, 1, 3, -6, 1, 1, 0, 1, 6, 1, 0, 1, 1, 1, 1,
+                    1, 1, 3, 0, 1, 1, 0, 1, 6, 1, 0, 1, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 5, 0, 0, 0, 0, 1, 1, 1, 1,
+                    1, 1, 1, 0, 0, 6, 5, 0, 0, 0, 0, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -193,6 +190,7 @@ class Level(object):
         global raccoon, trash
         self.blocks.clear()
         self.enemies.clear()
+        self.keys.clear()
         x = 0
         y = 0
         for _ in lev_list:
@@ -288,9 +286,6 @@ while True:
     for e in ENEMIES:
         e.draw(maze.image)
         e.move()
-
-    for d in DOORS:
-        d.draw(maze.image)
 
     for k in KEYS:
         k.draw(maze.image)
