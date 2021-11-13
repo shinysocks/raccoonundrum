@@ -40,6 +40,13 @@ class MazeSurf(object):
     def draw(self, surf):
         surf.blit(self.image, self.rect)
 
+
+class Raccoon(MazeSurf):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = RACCOON_IMAGES[0]
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
+
     def move_collide(self, vel_x, vel_y):
         self.rect.x += vel_x
         self.rect.y += vel_y
@@ -65,22 +72,15 @@ class MazeSurf(object):
                     self.rect.top = block.rect.bottom
 
 
-class Raccoon(MazeSurf):
+class MazeTrash(Raccoon):
     def __init__(self, pos):
-        super().__init__()
-        self.image = RACCOON_IMAGES[0]
+        super().__init__(pos)
+        self.image = TRASH_IMAGE
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
 
     def collide(self):
-        if self.rect.colliderect(trash.rect):
+        if self.rect.colliderect(raccoon.rect):
             level.lev_up()
-
-
-class MazeTrash(MazeSurf):
-    def __init__(self, pos):
-        super().__init__()
-        self.image = TRASH_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 40)
 
 
 class MazeBlock(MazeSurf):
@@ -89,10 +89,6 @@ class MazeBlock(MazeSurf):
         BLOCKS.append(self)
         self.image = BLOCK_IMAGE
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, SIZE, SIZE)
-
-    def collide(self):
-        if self.rect.colliderect(rat.rect):
-            rat.vel *= -1
 
 
 class MazeRat(MazeSurf):
@@ -114,8 +110,12 @@ class MazeRat(MazeSurf):
         if self.rat_type == 2:
             self.rect.y += self.vel
             self.hitrect.y += self.vel
-        
-        if self.rect.right >= 750 or self.rect.left <= 0:
+
+        for block in BLOCKS:
+            if self.rect.colliderect(block.rect):
+                self.vel *= -1
+
+        if self.rect.left <= 0 or self.rect.right >= 750:
             self.vel *= -1
 
         if self.rect.bottom >= 750 or self.rect.top <= 0:
@@ -158,16 +158,16 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 0, 0, 3, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+                    0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 2, 5, 0, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1
                     ]
                     }
 
@@ -244,7 +244,8 @@ while True:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] or keys[pygame.K_UP]:
         raccoon.image = RACCOON_IMAGES[0]
-        raccoon.move_collide(0, -3) and trash.move_collide(0, 3)
+        raccoon.move_collide(0, -3)
+        trash.move_collide(0, 3)
         
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
         raccoon.image = RACCOON_IMAGES[2]
@@ -272,5 +273,6 @@ while True:
 
     raccoon.draw(maze.image)
     trash.draw(maze.image)
+    trash.collide()
     
     pygame.display.flip()
