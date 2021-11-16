@@ -18,10 +18,10 @@ SIZE = 70
 MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (700, 700))
 BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (70, 70))
 RACCOON_IMAGES = [
-    pygame.transform.scale(pygame.image.load("assets/raccoon_front.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon1.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon0.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon0.jpg"), (70, 70))
+    pygame.image.load("assets/raccoon0.jpg"),
+    pygame.image.load("assets/raccoon1.jpg"),
+    pygame.image.load("assets/raccoon2.jpg"),
+    pygame.image.load("assets/raccoon3.jpg")
     ]
 
 TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
@@ -50,7 +50,7 @@ class MazeSurf(object):
 class Raccoon(MazeSurf):
     def __init__(self, pos):
         super().__init__()
-        self.image = RACCOON_IMAGES[0]
+        self.image = RACCOON_IMAGES[3]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
 
     def update(self, vel_x, vel_y):
@@ -252,23 +252,25 @@ while True:
                     TITLE = False
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_w] or keys[pygame.K_UP]:
+    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         raccoon.image = RACCOON_IMAGES[0]
+        raccoon.update(-3, 0)
+        trash.update(3, 0)
+
+    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+        raccoon.image = RACCOON_IMAGES[1]
+        raccoon.update(3, 0)
+        trash.update(-3, 0)
+
+    if keys[pygame.K_w] or keys[pygame.K_UP]:
+        raccoon.image = RACCOON_IMAGES[2]
         raccoon.update(0, -3)
         trash.update(0, 3)
         
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-        raccoon.image = RACCOON_IMAGES[2]
+        raccoon.image = RACCOON_IMAGES[3]
         raccoon.update(0, 3)
         trash.update(0, -3)
-    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-        raccoon.image = RACCOON_IMAGES[3]
-        raccoon.update(3, 0)
-        trash.update(-3, 0)
-    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-        raccoon.image = RACCOON_IMAGES[1]
-        raccoon.update(-3, 0)
-        trash.update(3, 0)
 
     WIN.fill((255, 255, 255, 0))
     maze.draw(WIN)
