@@ -19,9 +19,9 @@ MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (700,
 BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (70, 70))
 RACCOON_IMAGES = [
     pygame.transform.scale(pygame.image.load("assets/raccoon_front.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon_left.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon_front.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/raccoon_front.jpg"), (70, 70))
+    pygame.transform.scale(pygame.image.load("assets/raccoon1.jpg"), (70, 70)),
+    pygame.transform.scale(pygame.image.load("assets/raccoon0.jpg"), (70, 70)),
+    pygame.transform.scale(pygame.image.load("assets/raccoon0.jpg"), (70, 70))
     ]
 
 TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (40, 40))
