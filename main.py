@@ -5,7 +5,7 @@ import pygame
 from sys import exit
 from time import sleep
 pygame.init()
-WIN = pygame.display.set_mode((700, 700))
+WIN = pygame.display.set_mode((720, 720))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
@@ -24,7 +24,7 @@ RACCOON_IMAGES = [
     pygame.image.load("assets/raccoon3.jpg")
     ]
 
-TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (55, 55))
+TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (45, 45))
 
 RAT_IMAGES = [
     pygame.transform.scale(pygame.image.load("assets/rats_up.jpg"), (70, 70)),
@@ -39,6 +39,8 @@ class MazeSurf(object):
     def __init__(self):
         self.image = MAZE_IMAGE
         self.rect = self.image.get_rect()
+        self.rect.x += 10
+        self.rect.y += 10
 
     def fill(self, color):  # to be removed
         self.image.fill(color)
@@ -51,7 +53,9 @@ class Raccoon(MazeSurf):
     def __init__(self, pos):
         super().__init__()
         self.image = RACCOON_IMAGES[2]
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 55, 55)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
+        self.rect.x += 12
+        self.rect.y += 12
 
     def update(self, vel_x, vel_y):
         self.rect.x += vel_x
@@ -82,7 +86,9 @@ class MazeTrash(Raccoon):
     def __init__(self, pos):
         super().__init__(pos)
         self.image = TRASH_IMAGE
-        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 55, 55)
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
+        self.rect.x += 12
+        self.rect.y += 12
 
     def collide(self):
         if self.rect.colliderect(raccoon.rect):
@@ -103,20 +109,19 @@ class MazeRat(MazeSurf):
         RATS.append(self)
         self.image = RAT_IMAGES[0]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
-        self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 30, 30)
+        self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 50, 50)
+        self.hitrect.center = self.rect.center
         self.vel = 4
         self.rat_type = rat_type
 
     def update(self):
-        self.hitrect.center = self.rect.center
-
         if self.rat_type == 1:
             self.rect.x += self.vel
             self.hitrect.x += self.vel
             if self.vel == -4:
-                self.image = RAT_IMAGES[0]
+                self.image = RAT_IMAGES[2]
             else:
-                self.image = RAT_IMAGES[1]
+                self.image = RAT_IMAGES[3]
 
         if self.rat_type == 2:
             if self.vel == -4:
@@ -133,7 +138,7 @@ class MazeRat(MazeSurf):
         if self.rect.left <= 0 or self.rect.right >= 700:
             self.vel *= -1
 
-        if self.rect.bottom >= 700 or self.rect.top <= 0:
+        if self.rect.top <= 0 or self.rect.bottom >= 700:
             self.vel *= -1
 
         if self.hitrect.colliderect(trash.rect):
@@ -150,34 +155,29 @@ class Level(object):
         self.rats = RATS
         self.levels = {
                 1: [
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 3, 0, 0, 0, 0, 5, 0, 5, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 2, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
+                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     ],
 
                 2: [
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 3, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 2, 5, 0, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ]
                     }
 
@@ -255,22 +255,22 @@ while True:
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         raccoon.image = RACCOON_IMAGES[0]
         raccoon.update(-3, 0)
-        trash.update(-3, 0)
+        trash.update(3, 0)
 
     if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
         raccoon.image = RACCOON_IMAGES[1]
         raccoon.update(3, 0)
-        trash.update(3, 0)
+        trash.update(-3, 0)
 
     if keys[pygame.K_w] or keys[pygame.K_UP]:
         raccoon.image = RACCOON_IMAGES[2]
         raccoon.update(0, -3)
-        trash.update(0, -3)
+        trash.update(0, 3)
         
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
         raccoon.image = RACCOON_IMAGES[3]
         raccoon.update(0, 3)
-        trash.update(0, 3)
+        trash.update(0, -3)
 
     WIN.fill((255, 255, 255, 0))
     maze.draw(WIN)
