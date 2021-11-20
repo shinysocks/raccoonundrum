@@ -2,6 +2,7 @@
 
 # Initial Setup
 import pygame
+from random import randint
 from sys import exit
 from time import sleep
 pygame.init()
@@ -10,40 +11,47 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
 CLOCK = pygame.time.Clock()
-FILL = (255, 255, 255)
 BLOCKS, RATS = [], []
 SIZE = 70
 
 # Sprite Art
-MAZE_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (700, 700))
-BLOCK_IMAGE = pygame.transform.scale(pygame.image.load("assets/block.jpg"), (70, 70))
+BLOCK_IMAGES = [
+    pygame.transform.scale(pygame.image.load("assets/block0.jpg"), (70, 70)),
+    pygame.transform.scale(pygame.image.load("assets/block1.jpg"), (70, 70)),
+    pygame.transform.scale(pygame.image.load("assets/block2.jpg"), (70, 70)),
+    pygame.transform.scale(pygame.image.load("assets/block3.jpg"), (70, 70)),
+    ]
+
 RACCOON_IMAGES = [
     pygame.image.load("assets/raccoon0.jpg"),
     pygame.image.load("assets/raccoon1.jpg"),
     pygame.image.load("assets/raccoon2.jpg"),
-    pygame.image.load("assets/raccoon3.jpg")
+    pygame.image.load("assets/raccoon3.jpg"),
     ]
 
-TRASH_IMAGE = pygame.transform.scale(pygame.image.load("assets/trash.png"), (45, 45))
+TRASH_IMAGES = [
+    pygame.image.load("assets/trash0.png"),
+    pygame.image.load("assets/trash1.png"),
+    pygame.image.load("assets/trash2.png"),
+    pygame.image.load("assets/trash3.png"),
+    pygame.image.load("assets/trash4.png"),
+    ]
 
 RAT_IMAGES = [
-    pygame.transform.scale(pygame.image.load("assets/rats_up.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/rats_down.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/rats_left.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/rats_right.jpg"), (70, 70))
+    pygame.transform.rotate(pygame.image.load("assets/rats0.png"), 180),
+    pygame.transform.rotate(pygame.image.load("assets/rats1.png"), 0),
+    pygame.transform.rotate(pygame.image.load("assets/rats0.png"), 270),
+    pygame.transform.rotate(pygame.image.load("assets/rats1.png"), 90),
     ]
 
 
 # Classes
 class MazeSurf(object):
     def __init__(self):
-        self.image = MAZE_IMAGE
+        self.image = pygame.Surface((700, 700))
         self.rect = self.image.get_rect()
         self.rect.x += 10
         self.rect.y += 10
-
-    def fill(self, color):  # to be removed
-        self.image.fill(color)
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
@@ -85,7 +93,7 @@ class Raccoon(MazeSurf):
 class MazeTrash(Raccoon):
     def __init__(self, pos):
         super().__init__(pos)
-        self.image = TRASH_IMAGE
+        self.image = TRASH_IMAGES[0]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 45, 45)
         self.rect.x += 12
         self.rect.y += 12
@@ -99,7 +107,7 @@ class MazeBlock(MazeSurf):
     def __init__(self, pos):
         super().__init__()
         BLOCKS.append(self)
-        self.image = BLOCK_IMAGE
+        self.image = BLOCK_IMAGES[randint(0, 3)]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, SIZE, SIZE)
 
 
@@ -109,7 +117,7 @@ class MazeRat(MazeSurf):
         RATS.append(self)
         self.image = RAT_IMAGES[0]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
-        self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 50, 50)
+        self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 55)
         self.hitrect.center = self.rect.center
         self.vel = 4
         self.rat_type = rat_type
@@ -185,8 +193,8 @@ class Level(object):
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
+                    0, 0, 1, 0, 0, 4, 0, 1, 0, 0,
+                    0, 0, 1, 0, 0, 4, 0, 1, 0, 0,
                     0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     0, 5, 0, 5, 0, 5, 0, 5, 0, 0,
@@ -267,27 +275,31 @@ while True:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
         raccoon.image = RACCOON_IMAGES[0]
+        trash.image = TRASH_IMAGES[1]
         raccoon.update(-3, 0)
         trash.update(3, 0)
 
     if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
         raccoon.image = RACCOON_IMAGES[1]
+        trash.image = TRASH_IMAGES[2]
         raccoon.update(3, 0)
         trash.update(-3, 0)
 
     if keys[pygame.K_w] or keys[pygame.K_UP]:
         raccoon.image = RACCOON_IMAGES[2]
+        trash.image = TRASH_IMAGES[3]
         raccoon.update(0, -3)
         trash.update(0, 3)
         
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
         raccoon.image = RACCOON_IMAGES[3]
+        trash.image = TRASH_IMAGES[4]
         raccoon.update(0, 3)
         trash.update(0, -3)
 
-    WIN.fill((255, 255, 255, 0))
+    WIN.fill((255, 255, 255))
     maze.draw(WIN)
-    maze.fill(FILL)
+    maze.image.fill((255, 255, 255))
 
     for b in BLOCKS:
         b.draw(maze.image)
