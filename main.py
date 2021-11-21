@@ -13,13 +13,15 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 CLOCK = pygame.time.Clock()
 BLOCKS, RATS = [], []
 SIZE = 70
+TITLE = True
+CURRENT_IMAGE = 0
 
-# Sprite Art
+# Art
 BLOCK_IMAGES = [
-    pygame.transform.scale(pygame.image.load("assets/block0.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/block1.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/block2.jpg"), (70, 70)),
-    pygame.transform.scale(pygame.image.load("assets/block3.jpg"), (70, 70)),
+    pygame.image.load("assets/block0.jpg"),
+    pygame.image.load("assets/block1.jpg"),
+    pygame.image.load("assets/block2.jpg"),
+    pygame.image.load("assets/block3.jpg"),
     ]
 
 RACCOON_IMAGES = [
@@ -43,6 +45,29 @@ RAT_IMAGES = [
     pygame.transform.rotate(pygame.image.load("assets/rats0.png"), 270),
     pygame.transform.rotate(pygame.image.load("assets/rats1.png"), 90),
     ]
+
+TITLE_SCREEN = [
+    pygame.image.load("assets/title0.jpg"),
+    pygame.image.load("assets/title1.jpg"),
+    ]
+
+TITLE_BLANK = pygame.image.load("assets/title_blank.jpg")
+
+START_BUTTON = [
+    pygame.image.load("assets/start0.jpg"),
+    pygame.image.load("assets/start1.jpg"),
+    pygame.image.load("assets/start_pressed.jpg"),
+    ]
+
+QUIT_BUTTON = [
+    pygame.image.load("assets/quit0.jpg"),
+    pygame.image.load("assets/quit1.jpg"),
+    pygame.image.load("assets/quit_pressed.jpg"),
+    ]
+
+END_IMAGE = pygame.image.load("assets/the_end.jpg")
+DEATH_IMAGE = pygame.image.load("assets/death.jpg")
+LEVELUP_IMAGE = pygame.image.load("assets/complete.jpg")
 
 
 # Classes
@@ -162,7 +187,7 @@ class Level(object):
         self.blocks = BLOCKS
         self.rats = RATS
         self.levels = {
-                1: [
+                3: [
                     1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
@@ -188,19 +213,32 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ],
 
-                3: [
-                    0, 0, 5, 0, 5, 0, 5, 0, 5, 3,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-                    0, 0, 1, 0, 0, 4, 0, 1, 0, 0,
-                    0, 0, 1, 0, 0, 4, 0, 1, 0, 0,
-                    0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    0, 5, 0, 5, 0, 5, 0, 5, 0, 0,
-                    2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ]
-                    }
+                4: [
+                    1, 1, 1, 1, 0, 0, 0, 0, 0, 3,
+                    1, 0, 1, 1, 0, 0, 1, 1, 1, 1,
+                    1, 1, 1, 1, 5, 5, 0, 1, 0, 1,
+                    1, 1, 1, 1, 0, 0, 1, 1, 1, 0,
+                    1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                    1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
+                    0, 1, 1, 1, 0, 0, 1, 1, 0, 1,
+                    1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                    1, 1, 1, 1, 0, 0, 1, 1, 0, 1,
+                    2, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+                    ],
+
+                1: [
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 0,
+                    1, 1, 0, 0, 0, 0, 1, 1, 1, 0,
+                    1, 1, 0, 1, 1, 0, 1, 5, 1, 0,
+                    0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                    0, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    2, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                ]
+                }
 
     def generate(self, lev_list):
         global raccoon, trash
@@ -230,20 +268,34 @@ class Level(object):
                 y += 1
     
     def lev_up(self):
-        WIN.fill((0, 255, 0))
+        # transition
+        WIN.fill((0, 208, 0))
+        WIN.blit(LEVELUP_IMAGE, (10, 10))
         pygame.display.flip()
         sleep(2)
         self.level_num += 1
         try:
             self.generate(self.levels[self.level_num])
         except KeyError:
-            WIN.fill((0, 0, 0))
+            WIN.fill((50, 205, 50))
+            WIN.blit(END_IMAGE, (10, 10))
             pygame.display.flip()
-            sleep(3)
+            sleep(10)
             exit()
 
     def restart(self):
+        # fade out
+        do()
+        WIN.fill((139, 0, 0))
+        WIN.blit(DEATH_IMAGE, (10, 10))
+        pygame.display.flip()
+        sleep(1.5)
         self.generate(self.levels[self.level_num])
+
+
+# Functions
+def do():
+    print("potato")
 
 
 # Objects
@@ -252,7 +304,6 @@ maze = MazeSurf()
 level.generate(level.levels[1])
 
 # Game Loop
-TITLE = True
 while True:
     CLOCK.tick(60)
     for event in pygame.event.get():
@@ -262,7 +313,12 @@ while True:
 
     # Title Screen
     while TITLE:
-        WIN.fill((255, 0, 0))
+        CURRENT_IMAGE += .0013
+        if int(CURRENT_IMAGE) >= len(TITLE_SCREEN):
+            CURRENT_IMAGE = 0
+        WIN.fill((95, 158, 160))
+        WIN.blit(TITLE_BLANK, (10, 10))
+        WIN.blit(TITLE_SCREEN[int(CURRENT_IMAGE)], (10, 10))
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -297,7 +353,7 @@ while True:
         raccoon.update(0, 3)
         trash.update(0, -3)
 
-    WIN.fill((255, 255, 255))
+    WIN.fill((218, 165, 32))
     maze.draw(WIN)
     maze.image.fill((255, 255, 255))
 
