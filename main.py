@@ -14,7 +14,6 @@ CLOCK = pygame.time.Clock()
 BLOCKS, RATS = [], []
 SIZE = 70
 TITLE = True
-CURRENT_IMAGE = 0
 
 # Art
 BLOCK_IMAGES = [
@@ -54,16 +53,17 @@ TITLE_SCREEN = [
 TITLE_BLANK = pygame.image.load("assets/title_blank.jpg")
 
 START_BUTTON = [
-    pygame.image.load("assets/start0.jpg"),
-    pygame.image.load("assets/start1.jpg"),
-    pygame.image.load("assets/start_pressed.jpg"),
+    pygame.image.load("assets/start0.png"),
+    pygame.image.load("assets/start1.png"),
     ]
 
 QUIT_BUTTON = [
-    pygame.image.load("assets/quit0.jpg"),
-    pygame.image.load("assets/quit1.jpg"),
-    pygame.image.load("assets/quit_pressed.jpg"),
+    pygame.image.load("assets/quit0.png"),
+    pygame.image.load("assets/quit1.png"),
     ]
+
+START_HOVERED = pygame.image.load("assets/start_hover.png")
+QUIT_HOVERED = pygame.image.load("assets/quit_hover.png")
 
 END_IMAGE = pygame.image.load("assets/the_end.jpg")
 DEATH_IMAGE = pygame.image.load("assets/death.jpg")
@@ -136,34 +136,46 @@ class MazeBlock(MazeSurf):
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, SIZE, SIZE)
 
 
-class MazeRat(MazeSurf):
-    def __init__(self, pos, rat_type):
+class Title(MazeSurf):
+    def __init__(self, pos, image_list):
         super().__init__()
+        self.images = image_list
+        self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update(self, hovered):
+        if hovered:
+            WIN.blit(self.image, self.rect)
+            return
+
+        self.current_image += .008
+        if int(self.current_image) >= len(self.images):
+            self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        WIN.blit(self.image, self.rect)
+
+
+class Button(Title):
+    def __init__(self, pos, image_list):
+        super().__init__(pos, image_list)
+        self.images = image_list
+        self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.rect = self.image.get_rect(topleft=pos)
+
+
+class MazeRatUp(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self)
         RATS.append(self)
         self.image = RAT_IMAGES[0]
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
         self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 55)
         self.hitrect.center = self.rect.center
         self.vel = 4
-        self.rat_type = rat_type
 
-    def update(self):
-        if self.rat_type == 1:
-            self.rect.x += self.vel
-            self.hitrect.x += self.vel
-            if self.vel == -4:
-                self.image = RAT_IMAGES[2]
-            else:
-                self.image = RAT_IMAGES[3]
-
-        if self.rat_type == 2:
-            if self.vel == -4:
-                self.image = RAT_IMAGES[0]
-            else:
-                self.image = RAT_IMAGES[1]
-            self.rect.y += self.vel
-            self.hitrect.y += self.vel
-
+    def collide(self):
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
@@ -180,7 +192,38 @@ class MazeRat(MazeSurf):
         if self.hitrect.colliderect(raccoon.rect):
             level.restart()
 
+    def update(self):
+        if self.vel == -4:
+            self.image = RAT_IMAGES[0]
+        else:
+            self.image = RAT_IMAGES[1]
+        self.rect.y += self.vel
+        self.hitrect.y += self.vel
+
+        self.collide()
+
+
+class MazeRatSide(MazeRatUp):
+    def __init__(self, pos):
+        super().__init__(pos)
+        RATS.append(self)
+        self.image = RAT_IMAGES[2]
+        self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
+        self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 55, 40)
+        self.hitrect.center = self.rect.center
+        self.vel = 4
+
+    def update(self):
+        self.rect.x += self.vel
+        self.hitrect.x += self.vel
+        if self.vel == -4:
+            self.image = RAT_IMAGES[2]
+        else:
+            self.image = RAT_IMAGES[3]
+
+        self.collide()
             
+
 class Level(object):
     def __init__(self):
         self.level_num = 1
@@ -200,7 +243,7 @@ class Level(object):
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     ],
 
-                2: [
+                1: [
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
@@ -226,7 +269,7 @@ class Level(object):
                     2, 0, 0, 0, 0, 0, 1, 1, 1, 1,
                     ],
 
-                1: [
+                5: [
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
                     4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -257,10 +300,10 @@ class Level(object):
                 trash = MazeTrash([x, y])
 
             if lev_list[x + (y*10)] == 4:
-                MazeRat([x, y], 1)
+                MazeRatUp([x, y])
 
             if lev_list[x + (y*10)] == 5:
-                MazeRat([x, y], 2)
+                MazeRatSide([x, y])
             
             x += 1
             if x > 9:
@@ -285,7 +328,6 @@ class Level(object):
 
     def restart(self):
         # fade out
-        do()
         WIN.fill((139, 0, 0))
         WIN.blit(DEATH_IMAGE, (10, 10))
         pygame.display.flip()
@@ -293,12 +335,10 @@ class Level(object):
         self.generate(self.levels[self.level_num])
 
 
-# Functions
-def do():
-    print("potato")
-
-
 # Objects
+title_screen = Title((10, 10), TITLE_SCREEN)
+start_button = Button((310, 380), START_BUTTON)
+quit_button = Button((315, 510), QUIT_BUTTON)
 level = Level()
 maze = MazeSurf()
 level.generate(level.levels[1])
@@ -313,19 +353,39 @@ while True:
 
     # Title Screen
     while TITLE:
-        CURRENT_IMAGE += .0013
-        if int(CURRENT_IMAGE) >= len(TITLE_SCREEN):
-            CURRENT_IMAGE = 0
         WIN.fill((95, 158, 160))
         WIN.blit(TITLE_BLANK, (10, 10))
-        WIN.blit(TITLE_SCREEN[int(CURRENT_IMAGE)], (10, 10))
+        title_screen.update(False)
+
+        mouse = pygame.mouse.get_pos()
+        if start_button.rect.collidepoint(mouse):
+            start_button.image = START_HOVERED
+            start_button.update(True)
+
+        else:
+            start_button.update(False)
+
+        if quit_button.rect.collidepoint(mouse):
+            quit_button.image = QUIT_HOVERED
+            quit_button.update(True)
+
+        else:
+            quit_button.update(False)
+
         pygame.display.flip()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == 13:
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if quit_button.rect.collidepoint(mouse):
+                    pygame.quit()
+                    exit()
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.rect.collidepoint(mouse):
                     TITLE = False
 
     keys = pygame.key.get_pressed()
