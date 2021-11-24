@@ -229,7 +229,7 @@ class Level(object):
         self.blocks = BLOCKS
         self.rats = RATS
         self.levels = {
-                3: [
+                1: [
                     1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
@@ -242,13 +242,13 @@ class Level(object):
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     ],
 
-                1: [
+                2: [
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                     1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
@@ -268,7 +268,7 @@ class Level(object):
                     2, 0, 0, 0, 0, 0, 1, 1, 1, 1,
                     ],
 
-                5: [
+                3: [
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
                     4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -314,6 +314,7 @@ class Level(object):
         WIN.fill((0, 208, 0))
         WIN.blit(LEVELUP_IMAGE, (10, 10))
         pygame.display.flip()
+        quit_check()
         sleep(3)
         self.level_num += 1
         try:
@@ -322,11 +323,12 @@ class Level(object):
             WIN.fill((50, 205, 50))
             WIN.blit(END_IMAGE, (10, 10))
             pygame.display.flip()
+            quit_check()
             sleep(10)
             exit()
 
     def restart(self):
-        fade((135, 0, 0))
+        fade((150, 0, 0))
         WIN.blit(DEATH_IMAGE, (10, 10))
         pygame.display.flip()
         sleep(1.5)
@@ -341,30 +343,19 @@ level = Level()
 maze = Maze()
 
 
-def draw_all():
-    WIN.fill((218, 165, 32))
-    maze.draw(WIN)
-    maze.image.fill((255, 255, 255))
-
-    for b in BLOCKS:
-        b.draw(maze.image)
-
-    for r in RATS:
-        r.draw(maze.image)
-
-    raccoon.draw(maze.image)
-    trash.draw(maze.image)
+def quit_check():
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            pygame.quit()
+            exit()
 
 
 def fade(color):
     fade_win = pygame.Surface((720, 720))
     fade_win.fill(color)
-    for alpha in range(0, 250):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        draw_all()
+    for alpha in range(0, 280):
+        quit_check()
+        maze.draw(WIN)
         fade_win.set_alpha(alpha)
         WIN.blit(fade_win, (0, 0))
         pygame.display.update()
@@ -376,10 +367,7 @@ level.generate(level.levels[1])
 while True:
     CLOCK.tick(60)
     print(int(CLOCK.get_fps()))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+    quit_check()
 
     # Title Screen
     while TITLE:
@@ -443,9 +431,19 @@ while True:
         raccoon.update(0, 3)
         trash.update(0, -3)
 
-    draw_all()
+    WIN.fill((218, 165, 32))
+    maze.draw(WIN)
+    maze.image.fill((255, 255, 255))
+
+    for b in BLOCKS:
+        b.draw(maze.image)
+
     for r in RATS:
+        r.draw(maze.image)
         r.update()
+
+    raccoon.draw(maze.image)
+    trash.draw(maze.image)
     trash.collide()
     
     pygame.display.flip()
