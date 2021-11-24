@@ -6,8 +6,6 @@ from random import randint
 from sys import exit
 from time import sleep
 
-from pygame.event import Event
-
 pygame.init()
 WIN = pygame.display.set_mode((720, 720))
 pygame.display.set_caption("Racoonundrum - a trashy game")
@@ -164,7 +162,7 @@ class Button(Title):
         self.images = image_list
         self.current_image = 0
         self.image = self.images[int(self.current_image)]
-        self.rect = pygame.Rect(pos[0], pos[1], 110, 60)
+        self.rect = self.image.get_rect(topleft=(pos[0], pos[1]))
 
 
 class MazeRatUp(Maze):
@@ -337,8 +335,8 @@ class Level(object):
 
 # Objects & Functions
 title_screen = Title((10, 10), TITLE_SCREEN)
-start_button = Button((310, 380), START_BUTTON)
-quit_button = Button((315, 510), QUIT_BUTTON)
+start_button = Button((300, 385), START_BUTTON)
+quit_button = Button((305, 515), QUIT_BUTTON)
 level = Level()
 maze = Maze()
 
