@@ -173,17 +173,17 @@ class MazeRatUp(Maze):
         self.rect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 70, 70)
         self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 40, 55)
         self.hitrect.center = self.rect.center
-        self.vel = 2
+        self.vel = 4
 
     def collide(self):
         for block in BLOCKS:
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
 
-        if self.rect.left <= 0 or self.rect.right >= 700:
+        if self.rect.left <= 0 or self.rect.right >= 701:
             self.vel *= -1
 
-        if self.rect.top <= 0 or self.rect.bottom >= 700:
+        if self.rect.top <= 0 or self.rect.bottom >= 701:
             self.vel *= -1
 
         if self.hitrect.colliderect(trash.rect):
@@ -193,7 +193,7 @@ class MazeRatUp(Maze):
             level.restart()
 
     def update(self):
-        if self.vel == -2:
+        if self.vel == -4:
             self.image = RAT_IMAGES[0]
         else:
             self.image = RAT_IMAGES[1]
@@ -204,11 +204,13 @@ class MazeRatUp(Maze):
 
 
 class MazeRatSide(MazeRatUp):
-    def __init__(self, pos):
+    def __init__(self, pos): #WHY THE FUCK IT DOUBLED###
         super().__init__(pos)
         RATS.append(self)
         self.image = RAT_IMAGES[2]
         self.hitrect = pygame.Rect(pos[0]*SIZE, pos[1]*SIZE, 55, 40)
+        self.hitrect.center = self.rect.center
+        self.vel = 2
 
     def update(self):
         self.rect.x += self.vel
@@ -227,26 +229,26 @@ class Level(object):
         self.blocks = BLOCKS
         self.rats = RATS
         self.levels = {
-                1: [
-                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
+                2: [
+                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     ],
 
-                2: [
+                5: [
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                     1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
@@ -277,8 +279,21 @@ class Level(object):
                     0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
                     0, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     2, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                ]
-                }
+                    ],
+
+                1: [
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    1, 0, 0, 0, 0, 0, 0, 0, 0, 4,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 0,
+                    1, 1, 0, 0, 0, 0, 1, 1, 1, 0,
+                    1, 1, 0, 1, 1, 0, 1, 5, 1, 0,
+                    0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+                    0, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    2, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    ]
+                    }
 
     def generate(self, lev_list):
         global raccoon, trash
