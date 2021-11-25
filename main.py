@@ -16,6 +16,9 @@ BLOCKS, RATS = [], []
 SIZE = 70
 TITLE = True
 
+# Music
+pygame.mixer.music.load("assets/title_theme.wav")
+
 # Art
 BLOCK_IMAGES = [
     pygame.image.load("assets/block0.jpg"),
@@ -378,8 +381,13 @@ level.generate(level.levels[1])
 
 # Game Loop
 while True:
+    if TITLE:
+        pygame.mixer.music.play(-1)
+
+    else:
+        pygame.mixer.music.fadeout(800)
+
     CLOCK.tick(60)
-    print(int(CLOCK.get_fps()))
     quit_check()
 
     # Title Screen
