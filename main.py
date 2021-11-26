@@ -12,12 +12,20 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Constants
 CLOCK = pygame.time.Clock()
+MUSIC = pygame.mixer.music
 BLOCKS, RATS = [], []
 SIZE = 70
 TITLE = True
+BUTTON_PRESSED = False
+BUTTON_PRESSED1 = False
 
-# Music
-pygame.mixer.music.load("assets/title_theme.wav")
+# Music & Sounds
+MUSIC.load("assets/background_music.wav")
+
+TITLE_MUSIC = pygame.mixer.Sound("assets/title_theme.wav")
+BUTTON_SOUND = pygame.mixer.Sound("assets/button_sound.wav")
+DEATH_SOUND = pygame.mixer.Sound("assets/death_sound.wav")
+LEVELUP_SOUND = pygame.mixer.Sound("assets/complete_sound.wav")
 
 # Art
 BLOCK_IMAGES = [
@@ -207,7 +215,7 @@ class MazeRatUp(Maze):
 
 
 class MazeRatSide(MazeRatUp):
-    def __init__(self, pos): #WHY THE FUCK IT DOUBLED###
+    def __init__(self, pos):
         super().__init__(pos)
         RATS.append(self)
         self.image = RAT_IMAGES[2]
@@ -245,7 +253,7 @@ class Level(object):
                     1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     ],
 
-                5: [
+                1: [
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
@@ -284,7 +292,7 @@ class Level(object):
                     2, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ],
 
-                1: [
+                5: [
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
                     1, 0, 0, 0, 0, 0, 0, 0, 0, 4,
@@ -326,6 +334,7 @@ class Level(object):
                 y += 1
     
     def lev_up(self):
+        LEVELUP_SOUND.play(0)
         fade((255, 255, 250))
         WIN.fill((0, 208, 0))
         WIN.blit(LEVELUP_IMAGE, (10, 10))
@@ -344,6 +353,7 @@ class Level(object):
             exit()
 
     def restart(self):
+        DEATH_SOUND.play(0)
         fade((150, 0, 0))
         WIN.blit(DEATH_IMAGE, (10, 10))
         pygame.display.flip()
@@ -379,13 +389,16 @@ def fade(color):
 
 level.generate(level.levels[1])
 
+MUSIC.play(-1)
 # Game Loop
 while True:
     if TITLE:
-        pygame.mixer.music.play(-1)
+        MUSIC.pause()
+        TITLE_MUSIC.play(-1)
 
     else:
-        pygame.mixer.music.fadeout(800)
+        TITLE_MUSIC.fadeout(2000)
+        MUSIC.unpause()
 
     CLOCK.tick(60)
     quit_check()
@@ -398,17 +411,25 @@ while True:
 
         mouse = pygame.mouse.get_pos()
         if start_button.rect.collidepoint(mouse):
+            if not BUTTON_PRESSED:
+                BUTTON_SOUND.play(0)
+                BUTTON_PRESSED = True
             start_button.image = START_HOVERED
             start_button.update(True)
 
-        else:
+        if not start_button.rect.collidepoint(mouse):
+            BUTTON_PRESSED = False
             start_button.update(False)
 
         if quit_button.rect.collidepoint(mouse):
+            if not BUTTON_PRESSED1:
+                BUTTON_SOUND.play(0)
+                BUTTON_PRESSED1 = True
             quit_button.image = QUIT_HOVERED
             quit_button.update(True)
 
-        else:
+        if not quit_button.rect.collidepoint(mouse):
+            BUTTON_PRESSED1 = False
             quit_button.update(False)
 
         pygame.display.flip()
