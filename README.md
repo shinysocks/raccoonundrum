@@ -1,5 +1,5 @@
 # Racoonundrum 🦝
-### a trashy puzzle game created by Noah Dinan aka N041-1
+### a trashy puzzle game created by Noah Dinan aka shinysocks
 #### The mazes are infested with ***RATS!?!***
 
 #### Help reunite the raccoon with the trashcan in this puzzling game.
