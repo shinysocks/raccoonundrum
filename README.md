@@ -7,5 +7,6 @@
 ## Movement
  - press the <kbd>w</kbd><kbd>a</kbd><kbd>s</kbd><kbd>d</kbd>  or arrow keys to move the raccoon and the trashcan
 
-https://user-images.githubusercontent.com/91911303/143726540-7878f560-1a16-4897-a381-caf5a001adc1.mp4
+![Racoonundrum-a-trashy-game-2021-11-27-19-05-21_Trim](https://user-images.githubusercontent.com/91911303/143726590-23674179-94a4-4f95-99ff-582d5e85bdc4.gif)
 
+[Title Theme.pdf](https://github.com/shinysocks/racoonundrum/files/7612701/Title.Theme.pdf)
