@@ -9,4 +9,5 @@
 
 ![Racoonundrum-a-trashy-game-2021-11-27-19-05-21_Trim](https://user-images.githubusercontent.com/91911303/143726590-23674179-94a4-4f95-99ff-582d5e85bdc4.gif)
 
-[Title Theme.pdf](https://github.com/shinysocks/racoonundrum/files/7612701/Title.Theme.pdf)
+## Title Music Lead Sheet
+[Title Theme.pdf](https://github.com/shinysocks/racoonundrum/blob/main/Title%20Theme.pdf)
