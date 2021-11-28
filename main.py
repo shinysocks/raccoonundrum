@@ -240,7 +240,7 @@ class Level(object):
         self.blocks = BLOCKS
         self.rats = RATS
         self.levels = {
-                2: [  # hashtag
+                3: [  # hashtag
                     1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
@@ -253,7 +253,7 @@ class Level(object):
                     1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     ],
 
-                1: [  #tricky
+                4: [  #tricky
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
@@ -266,7 +266,7 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ],
 
-                4: [  # beginner
+                1: [  # beginner
                     1, 1, 1, 1, 0, 0, 0, 0, 0, 3,
                     1, 0, 1, 1, 0, 0, 1, 1, 1, 1,
                     1, 1, 1, 1, 5, 5, 0, 1, 0, 1,
@@ -308,6 +308,7 @@ class Level(object):
                 y += 1
     
     def lev_up(self):
+        global TITLE
         LEVELUP_SOUND.play(0)
         fade((255, 255, 250))
         WIN.fill((0, 208, 0))
@@ -319,12 +320,8 @@ class Level(object):
         try:
             self.generate(self.levels[self.level_num])
         except KeyError:
-            WIN.fill((50, 205, 50))
-            WIN.blit(END_IMAGE, (10, 10))
-            pygame.display.flip()
-            quit_check()
-            sleep(10)
-            exit()
+            self.level_num = 1
+            TITLE = True
 
     def restart(self):
         DEATH_SOUND.play(0)
@@ -360,8 +357,6 @@ def fade(color):
         WIN.blit(fade_win, (0, 0))
         pygame.display.update()
 
-
-level.generate(level.levels[1])
 
 MUSIC.play(-1)
 # Game Loop
@@ -420,6 +415,7 @@ while True:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.rect.collidepoint(mouse):
+                    level.generate(level.levels[level.level_num])
                     TITLE = False
 
     keys = pygame.key.get_pressed()
