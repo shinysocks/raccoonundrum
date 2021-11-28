@@ -77,7 +77,6 @@ QUIT_BUTTON = [
 START_HOVERED = pygame.image.load("assets/start_hover.png")
 QUIT_HOVERED = pygame.image.load("assets/quit_hover.png")
 
-END_IMAGE = pygame.image.load("assets/the_end.jpg")
 DEATH_IMAGE = pygame.image.load("assets/death.jpg")
 LEVELUP_IMAGE = pygame.image.load("assets/complete.jpg")
 
