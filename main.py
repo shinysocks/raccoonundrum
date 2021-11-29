@@ -7,7 +7,7 @@ from sys import exit
 from time import sleep
 
 pygame.init()
-win = pygame.display.set_mode((720, 720))
+win = pygame.display.set_mode((700, 700))
 pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Variables
@@ -16,6 +16,7 @@ music = pygame.mixer.music
 blocks, rats = [], []
 sprites = {}
 size = 70
+white = (255, 255, 255)
 isTitle = True
 start_pressed = False
 quit_pressed = False
@@ -30,30 +31,10 @@ death_sound = pygame.mixer.Sound("assets/death_sound.wav")
 levelup_sound = pygame.mixer.Sound("assets/complete_sound.wav")
 
 # Art
-title_screen = [
-    pygame.image.load("assets/title0.jpg"),
-    pygame.image.load("assets/title1.jpg"),
-    ]
-
-title_blank = pygame.image.load("assets/title_blank.jpg")
-
-start_button = [
-    pygame.image.load("assets/start0.png"),
-    pygame.image.load("assets/start1.png"),
-    ]
-
-quit_button = [
-    pygame.image.load("assets/quit0.png"),
-    pygame.image.load("assets/quit1.png"),
-    ]
-
-start_hovered = pygame.image.load("assets/start_hover.png")
-quit_hovered = pygame.image.load("assets/quit_hover.png")
-
 death_image = pygame.image.load("assets/death.jpg")
 levelup_image = pygame.image.load("assets/complete.jpg")
 
-# Tutorial Text
+# Tutorial
 font = pygame.font.Font("assets/font.ttf", 50)
 tutorial_text = [
     font.render("the raccoon and the trash", True, (30, 30, 30)), 
@@ -72,10 +53,78 @@ class Maze(object):
     def __init__(self):
         self.image = pygame.Surface((700, 700))
         self.rect = self.image.get_rect()
-        self.rect.topleft = (10, 10)
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
+
+
+class Title(Maze):
+    def __init__(self, pos):
+        super().__init__()
+        self.images = [
+            pygame.image.load("assets/title0.jpg"),
+            pygame.image.load("assets/title1.jpg"),
+            ]
+        self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def update(self):
+        self.current_image += .003
+        if int(self.current_image) >= len(self.images):
+            self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.draw(self.image, self.rect)
+
+
+class StartButton(Title):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.hovered = pygame.image.load("assets/start_hover.png")
+        self.over = False
+        self.images = [
+            pygame.image.load("assets/start0.png"),
+            pygame.image.load("assets/start1.png"),
+            ]
+        self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.rect = self.image.get_rect(topleft=(pos[0], pos[1]))
+
+    def hover(self, mouse):
+        if self.rect.collidepoint(mouse):
+            if not self.over:
+                button_sound.play(0)
+                self.over = True
+            self.image = self.hovered
+            self.update()
+
+        if not self.rect.collidepoint(mouse):
+            self.over = False
+            self.update()
+
+
+class QuitButton(StartButton):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.hovered = pygame.image.load("assets/quit_hover.png")
+        self.images = [
+            pygame.image.load("assets/quit0.png"),
+            pygame.image.load("assets/quit1.png"),
+            ]
+
+
+class MazeBlock(Maze):
+    def __init__(self, pos):
+        super().__init__()
+        blocks.append(self)
+        self.images = [
+            pygame.image.load("assets/block0.jpg"),
+            pygame.image.load("assets/block1.jpg"),
+            pygame.image.load("assets/block2.jpg"),
+            pygame.image.load("assets/block3.jpg"),
+            ]
+        self.image = self.images[randint(0, 3)]
+        self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
 
 
 class Raccoon(Maze):
@@ -157,49 +206,6 @@ class MazeTrash(Raccoon):
     def collide(self):
         if self.rect.colliderect(sprites["raccoon"].rect):
             level.lev_up()
-
-
-class MazeBlock(Maze):
-    def __init__(self, pos):
-        super().__init__()
-        blocks.append(self)
-        self.images = [
-            pygame.image.load("assets/block0.jpg"),
-            pygame.image.load("assets/block1.jpg"),
-            pygame.image.load("assets/block2.jpg"),
-            pygame.image.load("assets/block3.jpg"),
-            ]
-        self.image = self.images[randint(0, 3)]
-        self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
-
-
-class Title(Maze):
-    def __init__(self, pos, image_list):
-        super().__init__()
-        self.images = image_list
-        self.current_image = 0
-        self.image = self.images[int(self.current_image)]
-        self.rect = self.image.get_rect(topleft=pos)
-
-    def update(self, hovered):
-        if hovered:
-            win.blit(self.image, self.rect)
-            return
-
-        self.current_image += .003
-        if int(self.current_image) >= len(self.images):
-            self.current_image = 0
-        self.image = self.images[int(self.current_image)]
-        win.blit(self.image, self.rect)
-
-
-class Button(Title):
-    def __init__(self, pos, image_list):
-        super().__init__(pos, image_list)
-        self.images = image_list
-        self.current_image = 0
-        self.image = self.images[int(self.current_image)]
-        self.rect = self.image.get_rect(topleft=(pos[0], pos[1]))
 
 
 class MazeRatUp(Maze):
@@ -345,8 +351,8 @@ class Level(object):
         global isTitle
         levelup_sound.play(0)
         fade((255, 255, 250))
-        win.fill((0, 208, 0))
-        win.blit(levelup_image, (10, 10))
+        win.fill(white)
+        win.blit(levelup_image, (0, 0))
         pygame.display.flip()
         quit_check()
         sleep(3)
@@ -360,8 +366,9 @@ class Level(object):
     def restart(self):
         death_sound.play(0)
         fade((150, 0, 0))
-        win.blit(death_image, (10, 10))
+        win.blit(death_image, (0, 0))
         pygame.display.flip()
+
         if self.deaths == 0:
             win.blit(tutorial_text[4], (80, 300))
             win.blit(tutorial_text[5], (100, 370))
@@ -385,9 +392,9 @@ class Level(object):
 
 
 # Objects & Functions
-title = Title((10, 10), title_screen)
-button_start = Button((300, 385), start_button)
-button_quit = Button((305, 515), quit_button)
+title = Title((0, 0))
+start_button = StartButton((290, 375))
+quit_button = QuitButton((295, 505))
 level = Level()
 maze = Maze()
 
@@ -400,7 +407,7 @@ def quit_check():
 
 
 def fade(color):
-    fade_win = pygame.Surface((720, 720))
+    fade_win = pygame.Surface((700, 700))
     fade_win.fill(color)
     for alpha in range(0, 280):
         quit_check()
@@ -426,33 +433,36 @@ while True:
 
     # Title Screen
     while isTitle:
-        win.fill((95, 158, 160))
-        win.blit(title_blank, (10, 10))
-        title.update(False)
+        win.fill(white)
+        title.update()
 
         mouse = pygame.mouse.get_pos()
-        if button_start.rect.collidepoint(mouse):
+
+        if start_button.rect.collidepoint(mouse):
             if not start_pressed:
                 button_sound.play(0)
                 start_pressed = True
-            button_start.image = start_hovered
-            button_start.update(True)
+            start_button.image = start_button.hovered
+            start_button.update()
 
-        if not button_start.rect.collidepoint(mouse):
+        if not start_button.rect.collidepoint(mouse):
             start_pressed = False
-            button_start.update(False)
+            start_button.update()
 
-        if button_quit.rect.collidepoint(mouse):
+        if quit_button.rect.collidepoint(mouse):
             if not quit_pressed:
                 button_sound.play(0)
                 quit_pressed = True
-            button_quit.image = quit_hovered
-            button_quit.update(True)
+            quit_button.image = quit_button.hovered
+            quit_button.update()
 
-        if not button_quit.rect.collidepoint(mouse):
+        if not quit_button.rect.collidepoint(mouse):
             quit_pressed = False
-            button_quit.update(False)
+            quit_button.update()
 
+        title.draw(win)
+        start_button.draw(win)
+        quit_button.draw(win)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -461,12 +471,12 @@ while True:
                 exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if button_quit.rect.collidepoint(mouse):
+                if quit_button.rect.collidepoint(mouse):
                     pygame.quit()
                     exit()
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if button_start.rect.collidepoint(mouse):
+                if start_button.rect.collidepoint(mouse):
                     level.generate(level.levels[level.level_num])
                     isTitle = False
 
@@ -474,16 +484,16 @@ while True:
     sprites["raccoon"].input(keys_pressed)
     sprites["trash"].input(keys_pressed)
 
-    win.fill((200, 200, 200))
+    win.fill((255, 255, 255))
     maze.draw(win)
     maze.image.fill((255, 255, 255))
 
     # tutorial text
     if level.level_num == 1:
-        win.blit(tutorial_text[0], (40, 20))
-        win.blit(tutorial_text[1], (180, 85))
-        win.blit(tutorial_text[2], (90, 575))
-        win.blit(tutorial_text[3], (140, 645))
+        win.blit(tutorial_text[0], (30, 10))
+        win.blit(tutorial_text[1], (170, 75))
+        win.blit(tutorial_text[2], (80, 565))
+        win.blit(tutorial_text[3], (130, 635))
 
     for b in blocks:
         b.draw(maze.image)
