@@ -1,4 +1,4 @@
-# DEDICATED TO EMILY
+# DEDICATED TO EMILY #
 
 # Initial Setup
 import pygame
