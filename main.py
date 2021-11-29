@@ -19,6 +19,7 @@ size = 70
 isTitle = True
 start_pressed = False
 quit_pressed = False
+first_death = True
 
 # Music & Sounds
 music.load("assets/background_music.wav")
@@ -29,7 +30,6 @@ death_sound = pygame.mixer.Sound("assets/death_sound.wav")
 levelup_sound = pygame.mixer.Sound("assets/complete_sound.wav")
 
 # Art
-
 title_screen = [
     pygame.image.load("assets/title0.jpg"),
     pygame.image.load("assets/title1.jpg"),
@@ -53,6 +53,19 @@ quit_hovered = pygame.image.load("assets/quit_hover.png")
 death_image = pygame.image.load("assets/death.jpg")
 levelup_image = pygame.image.load("assets/complete.jpg")
 
+# Tutorial Text
+font = pygame.font.Font("assets/font.ttf", 50)
+tutorial_text = [
+    font.render("the raccoon and the trash", True, (30, 30, 30)), 
+    font.render("move contrary.", True, (30, 30, 30)),
+    font.render("if they strike the rats,", True, (30, 30, 30)),
+    font.render("it won't be merry.", True, (30, 30, 30)),
+    font.render("try not to do that again", True, (0, 0, 0)),
+    font.render("they should be fine...", True, (0, 0, 0)),
+    font.render("again? seriously?", True, (0, 0, 0)),
+    font.render("stop. you're hurting them.", True, (255, 0, 0)),
+    ]
+                
 
 # Classes
 class Maze(object):
@@ -210,10 +223,10 @@ class MazeRatUp(Maze):
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
 
-        if self.rect.left <= 0 or self.rect.right >= 701:
+        if self.rect.left <= 0 or self.rect.right > 700:
             self.vel *= -1
 
-        if self.rect.top <= 0 or self.rect.bottom >= 701:
+        if self.rect.top <= 0 or self.rect.bottom > 700:
             self.vel *= -1
 
         if self.hitrect.colliderect(sprites["trash"].rect):
@@ -256,11 +269,12 @@ class MazeRatSide(MazeRatUp):
 class Level(object):
     def __init__(self):
         self.level_num = 1
+        self.deaths = 0
         self.sprites = sprites
         self.blocks = blocks
         self.rats = rats
         self.levels = {
-                3: [  # hashtag
+                2: [  # hashtag
                     1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
@@ -273,7 +287,7 @@ class Level(object):
                     1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
                     ],
 
-                4: [  # tricky
+                3: [  # tricky
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
@@ -286,30 +300,17 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ],
 
-                1: [  # beginner
-                    1, 1, 1, 1, 0, 0, 0, 0, 0, 3,
-                    1, 0, 1, 1, 0, 0, 1, 1, 1, 1,
-                    1, 1, 1, 1, 5, 5, 0, 1, 0, 1,
-                    1, 1, 1, 1, 0, 0, 1, 1, 1, 0,
-                    1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
-                    1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
-                    0, 1, 1, 1, 0, 0, 1, 1, 0, 1,
-                    1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
-                    1, 1, 1, 1, 0, 0, 1, 1, 0, 1,
-                    2, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-                    ],
-
-                2: [  # charlie's level
-                    1, 1, 1, 1, 1, 1, 0, 3, 1, 1,
-                    1, 1, 1, 1, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 1, 5, 1, 0, 1, 1, 1,
-                    1, 1, 1, 1, 0, 1, 0, 1, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 4,
-                    0, 0, 0, 0, 4, 0, 4, 0, 0, 0,
-                    1, 1, 1, 1, 0, 1, 0, 1, 1, 1,
-                    1, 1, 1, 1, 0, 1, 5, 1, 1, 1,
-                    1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
-                    1, 1, 1, 2, 0, 1, 1, 1, 1, 1,
+                1: [  # tutorial
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    2, 0, 0, 0, 1, 1, 0, 0, 0, 3,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
+                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
+                    1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     ],
                     }
 
@@ -361,8 +362,26 @@ class Level(object):
         fade((150, 0, 0))
         win.blit(death_image, (10, 10))
         pygame.display.flip()
-        sleep(1.5)
+        if self.deaths == 0:
+            win.blit(tutorial_text[4], (80, 300))
+            win.blit(tutorial_text[5], (100, 370))
+            pygame.display.flip()
+            sleep(4)
+
+        if self.deaths == 1:
+            win.blit(tutorial_text[6], (140, 330))
+            pygame.display.flip()
+            sleep(4)
+
+        if self.deaths == 2:
+            win.blit(tutorial_text[7], (35, 330))
+            pygame.display.flip()
+            sleep(4)
+
+        self.deaths += 1
+        sleep(1.75)
         self.generate(self.levels[self.level_num])
+        pygame.display.flip()
 
 
 # Objects & Functions
@@ -455,9 +474,16 @@ while True:
     sprites["raccoon"].input(keys_pressed)
     sprites["trash"].input(keys_pressed)
 
-    win.fill((218, 165, 32))
+    win.fill((200, 200, 200))
     maze.draw(win)
     maze.image.fill((255, 255, 255))
+
+    # tutorial text
+    if level.level_num == 1:
+        win.blit(tutorial_text[0], (40, 20))
+        win.blit(tutorial_text[1], (180, 85))
+        win.blit(tutorial_text[2], (90, 575))
+        win.blit(tutorial_text[3], (140, 645))
 
     for b in blocks:
         b.draw(maze.image)
