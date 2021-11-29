@@ -18,9 +18,6 @@ sprites = {}
 size = 70
 white = (255, 255, 255)
 isTitle = True
-start_pressed = False
-quit_pressed = False
-first_death = True
 
 # Music & Sounds
 music.load("assets/background_music.wav")
@@ -74,7 +71,7 @@ class Title(Maze):
         if int(self.current_image) >= len(self.images):
             self.current_image = 0
         self.image = self.images[int(self.current_image)]
-        self.draw(self.image, self.rect)
+        self.draw(win)
 
 
 class StartButton(Title):
@@ -96,7 +93,7 @@ class StartButton(Title):
                 button_sound.play(0)
                 self.over = True
             self.image = self.hovered
-            self.update()
+            self.draw(win)
 
         if not self.rect.collidepoint(mouse):
             self.over = False
@@ -170,7 +167,7 @@ class Raccoon(Maze):
                 if vel_y < 0:
                     self.rect.top = block.rect.bottom
 
-    def input(self, pressed):
+    def update(self, pressed):
         if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
             self.image = self.images[0]
             self.move_collide(-3, 0)
@@ -186,6 +183,8 @@ class Raccoon(Maze):
         if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
             self.image = self.images[3]
             self.move_collide(0, 3)
+
+        self.draw(maze.image)
 
 
 class MazeTrash(Raccoon):
@@ -370,18 +369,18 @@ class Level(object):
         pygame.display.flip()
 
         if self.deaths == 0:
-            win.blit(tutorial_text[4], (80, 300))
-            win.blit(tutorial_text[5], (100, 370))
+            win.blit(tutorial_text[4], (70, 290))
+            win.blit(tutorial_text[5], (90, 360))
             pygame.display.flip()
             sleep(4)
 
         if self.deaths == 1:
-            win.blit(tutorial_text[6], (140, 330))
+            win.blit(tutorial_text[6], (130, 320))
             pygame.display.flip()
             sleep(4)
 
         if self.deaths == 2:
-            win.blit(tutorial_text[7], (35, 330))
+            win.blit(tutorial_text[7], (25, 320))
             pygame.display.flip()
             sleep(4)
 
@@ -437,32 +436,8 @@ while True:
         title.update()
 
         mouse = pygame.mouse.get_pos()
-
-        if start_button.rect.collidepoint(mouse):
-            if not start_pressed:
-                button_sound.play(0)
-                start_pressed = True
-            start_button.image = start_button.hovered
-            start_button.update()
-
-        if not start_button.rect.collidepoint(mouse):
-            start_pressed = False
-            start_button.update()
-
-        if quit_button.rect.collidepoint(mouse):
-            if not quit_pressed:
-                button_sound.play(0)
-                quit_pressed = True
-            quit_button.image = quit_button.hovered
-            quit_button.update()
-
-        if not quit_button.rect.collidepoint(mouse):
-            quit_pressed = False
-            quit_button.update()
-
-        title.draw(win)
-        start_button.draw(win)
-        quit_button.draw(win)
+        start_button.hover(mouse)
+        quit_button.hover(mouse)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -480,13 +455,13 @@ while True:
                     level.generate(level.levels[level.level_num])
                     isTitle = False
 
-    keys_pressed = pygame.key.get_pressed()
-    sprites["raccoon"].input(keys_pressed)
-    sprites["trash"].input(keys_pressed)
-
     win.fill((255, 255, 255))
     maze.draw(win)
     maze.image.fill((255, 255, 255))
+    
+    keys_pressed = pygame.key.get_pressed()
+    sprites["raccoon"].update(keys_pressed)
+    sprites["trash"].update(keys_pressed)
 
     # tutorial text
     if level.level_num == 1:
@@ -502,8 +477,6 @@ while True:
         r.draw(maze.image)
         r.update()
 
-    sprites["raccoon"].draw(maze.image)
-    sprites["trash"].draw(maze.image)
     sprites["trash"].collide()
     
     pygame.display.flip()
