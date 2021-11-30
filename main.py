@@ -228,10 +228,10 @@ class MazeRatUp(Maze):
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
 
-        if self.rect.left <= 0 or self.rect.right > 700:
+        if self.rect.left < 0 or self.rect.right > 700:
             self.vel *= -1
 
-        if self.rect.top <= 0 or self.rect.bottom > 700:
+        if self.rect.top < 0 or self.rect.bottom > 700:
             self.vel *= -1
 
         if self.hitrect.colliderect(sprites["trash"].rect):
@@ -305,7 +305,7 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
                     ],
 
-                1: [  # tutorial
+                4: [  # tutorial
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     2, 0, 0, 0, 1, 1, 0, 0, 0, 3,
@@ -316,6 +316,19 @@ class Level(object):
                     1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    ],
+
+                1: [  # rapunzel
+                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                    0, 1, 1, 1, 1, 0, 1, 1, 1, 0,
+                    0, 1, 0, 0, 0, 4, 1, 2, 0, 0,
+                    0, 1, 1, 1, 0, 1, 1, 0, 1, 0,
+                    0, 1, 4, 0, 0, 0, 1, 1, 1, 0,
+                    0, 0, 1, 1, 1, 0, 1, 1, 1, 0,
+                    0, 1, 1, 1, 1, 3, 1, 1, 0, 0,
+                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0,
+                    5, 0, 0, 0, 0, 4, 0, 0, 0, 5,
                     ],
                     }
 
@@ -464,7 +477,7 @@ while True:
     sprites["trash"].update(keys_pressed)
 
     # tutorial text
-    if level.level_num == 1:
+    if level.level_num == 0:
         win.blit(tutorial_text[0], (30, 10))
         win.blit(tutorial_text[1], (170, 75))
         win.blit(tutorial_text[2], (80, 565))
