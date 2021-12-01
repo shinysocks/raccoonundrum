@@ -14,10 +14,19 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 music = pygame.mixer.music
 blocks, rats = [], []
+levels = {}
+with open("levels.txt", 'r') as file:
+    for level in file:
+        (key, value) = level.split(":")
+        levels[int(key)] = list(value)
+    print(levels)
+    
 sprites = {}
 size = 70
 white = (255, 255, 255)
-isTitle = True
+titleing = True
+building = False
+
 
 # Music & Sounds
 music.load("assets/background_music.wav")
@@ -46,9 +55,8 @@ tutorial_text = [
                 
 
 # Classes
-class Block(object):
+class Block():
     def __init__(self, pos):
-        super().__init__()
         blocks.append(self)
         self.images = [
             pygame.image.load("assets/block0.jpg"),
@@ -59,13 +67,9 @@ class Block(object):
         self.image = self.images[randint(0, 3)]
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
 
-    def draw(self):
-        win.blit(self.image, self.rect)
 
-
-class Title(Block):
+class Title():
     def __init__(self, pos):
-        super().__init__(pos)
         self.images = [
             pygame.image.load("assets/title0.jpg"),
             pygame.image.load("assets/title1.jpg"),
@@ -79,7 +83,7 @@ class Title(Block):
         if int(self.current_image) >= len(self.images):
             self.current_image = 0
         self.image = self.images[int(self.current_image)]
-        self.draw()
+        draw(self)
 
 
 class StartButton(Title):
@@ -101,7 +105,7 @@ class StartButton(Title):
                 button_sound.play(0)
                 self.over = True
             self.image = self.hovered
-            self.draw()
+            draw(self)
 
         if not self.rect.collidepoint(mouse):
             self.over = False
@@ -118,9 +122,21 @@ class QuitButton(StartButton):
             ]
 
 
-class Raccoon(Block):
+class BuildButton(StartButton):
     def __init__(self, pos):
         super().__init__(pos)
+        self.hovered = pygame.Surface((100, 50))
+        # pygame.image.load("assets/build_hover.png")
+        self.images = [
+            pygame.Surface((120, 50)),
+            pygame.Surface((80, 50)),
+            # pygame.image.load("assets/build0.png"),
+            # pygame.image.load("assets/build1.png"),
+            ]
+
+
+class Raccoon():
+    def __init__(self, pos):
         self.images = [
             pygame.image.load("assets/raccoon0.jpg"),
             pygame.image.load("assets/raccoon1.jpg"),
@@ -164,31 +180,31 @@ class Raccoon(Block):
     def update(self, pressed):
         if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
             self.image = self.images[0]
-            self.move_collide(-1, 0)
+            self.move_collide(-3, 0)
 
         if pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
             self.image = self.images[1]
-            self.move_collide(1, 0)
+            self.move_collide(3, 0)
 
         if pressed[pygame.K_w] or pressed[pygame.K_UP]:
             self.image = self.images[2]
-            self.move_collide(0, -1)
+            self.move_collide(0, -3)
 
         if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
             self.image = self.images[3]
-            self.move_collide(0, 1)
+            self.move_collide(0, 3)
 
-        self.draw()
+        draw(self)
 
 
 class Trash(Raccoon):
     def __init__(self, pos):
         super().__init__(pos)
         self.images = [
-            pygame.image.load("assets/trash0.png"),
             pygame.image.load("assets/trash1.png"),
-            pygame.image.load("assets/trash2.png"),
+            pygame.image.load("assets/trash0.png"),
             pygame.image.load("assets/trash3.png"),
+            pygame.image.load("assets/trash2.png"),
             ]
         self.image = self.images[2]
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, 45, 45)
@@ -201,9 +217,8 @@ class Trash(Raccoon):
             level.lev_up()
 
 
-class RatUp(Block):
+class RatUp():
     def __init__(self, pos):
-        super().__init__(pos)
         rats.append(self)
         self.images = [
             pygame.transform.rotate(pygame.image.load("assets/rats0.png"), 180),
@@ -235,13 +250,14 @@ class RatUp(Block):
             level.restart()
 
     def update(self):
+        self.rect.y += self.vel
+        self.hitrect.y += self.vel
         if self.vel == -4:
             self.image = self.images[0]
         else:
             self.image = self.images[1]
-        self.rect.y += self.vel
-        self.hitrect.y += self.vel
 
+        draw(self)
         self.collide()
 
 
@@ -261,10 +277,16 @@ class RatSide(RatUp):
             self.image = self.images[2]
         else:
             self.image = self.images[3]
-
+        
+        draw(self)
         self.collide()
-            
 
+
+class Build(object):
+    def __init__(self):
+        pass
+
+            
 class Level(object):
     def __init__(self):
         self.level_num = 1
@@ -272,81 +294,28 @@ class Level(object):
         self.sprites = sprites
         self.blocks = blocks
         self.rats = rats
-        self.levels = {
-                2: [  # hashtag
-                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
-                    ],
-
-                3: [  # tricky
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    ],
-
-                4: [  # tutorial
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    2, 0, 0, 0, 1, 1, 0, 0, 0, 3,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
-                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
-                    1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    ],
-
-                1: [  # rapunzel
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                    0, 1, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 0, 0, 0, 4, 1, 2, 0, 0,
-                    0, 1, 1, 1, 0, 1, 1, 0, 1, 0,
-                    0, 1, 4, 0, 0, 0, 1, 1, 1, 0,
-                    0, 0, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 1, 1, 1, 3, 1, 1, 0, 0,
-                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
-                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0,
-                    5, 0, 0, 0, 0, 4, 0, 0, 0, 5,
-                    ],
-                    }
+        self.levels = levels
 
     def generate(self, lev_list):
-        win.fill(white)
         self.blocks.clear()
         self.rats.clear()
         self.sprites.clear()
         x = 0
         y = 0
         for _ in lev_list:
-            if lev_list[x + (y*10)] == 1:
+            if lev_list[x + (y*10)] == "1":
                 Block((x, y))
 
-            if lev_list[x + (y*10)] == 2:
+            if lev_list[x + (y*10)] == "2":
                 self.sprites["raccoon"] = Raccoon([x, y])
 
-            if lev_list[x + (y*10)] == 3:
+            if lev_list[x + (y*10)] == "3":
                 self.sprites["trash"] = Trash([x, y])
 
-            if lev_list[x + (y*10)] == 4:
+            if lev_list[x + (y*10)] == "4":
                 RatSide([x, y])
 
-            if lev_list[x + (y*10)] == 5:
+            if lev_list[x + (y*10)] == "5":
                 RatUp([x, y])
 
             x += 1
@@ -355,7 +324,7 @@ class Level(object):
                 y += 1
 
     def lev_up(self):
-        global isTitle
+        global titleing
         levelup_sound.play(0)
         fade((255, 255, 250))
         win.fill(white)
@@ -368,7 +337,7 @@ class Level(object):
             self.generate(self.levels[self.level_num])
         except KeyError:
             self.level_num = 1
-            isTitle = True
+            titleing = True
 
     def restart(self):
         death_sound.play(0)
@@ -380,29 +349,37 @@ class Level(object):
             win.blit(tutorial_text[4], (70, 290))
             win.blit(tutorial_text[5], (90, 360))
             pygame.display.flip()
-            sleep(3.25)
+            sleep(4)
 
         if self.deaths == 1:
             win.blit(tutorial_text[6], (130, 320))
             pygame.display.flip()
-            sleep(3.25)
+            sleep(4)
 
         if self.deaths == 2:
             win.blit(tutorial_text[7], (25, 320))
             pygame.display.flip()
-            sleep(3.25)
+            sleep(4)
 
         self.deaths += 1
+        sleep(1.75)
         self.generate(self.levels[self.level_num])
-        sleep(1.5)
         pygame.display.flip()
+
+    def build(self):
+        pass
 
 
 # Objects & Functions
 title = Title((0, 0))
 start_button = StartButton((290, 375))
-quit_button = QuitButton((295, 505))
+build_button = BuildButton((290, 470))
+quit_button = QuitButton((300, 550))
 level = Level()
+
+
+def draw(self):
+    win.blit(self.image, self.rect)
 
 
 def quit_check():
@@ -423,10 +400,9 @@ def fade(color):
 
 
 music.play(-1)
-
 # Game Loop
 while True:
-    if isTitle:
+    if titleing:
         music.pause()
         title_music.play(-1)
 
@@ -438,12 +414,13 @@ while True:
     quit_check()
 
     # Title Screen
-    while isTitle:
+    while titleing:
         win.fill(white)
         title.update()
 
         mouse = pygame.mouse.get_pos()
         start_button.hover(mouse)
+        build_button.hover(mouse)
         quit_button.hover(mouse)
         pygame.display.flip()
 
@@ -453,14 +430,19 @@ while True:
                 exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.rect.collidepoint(mouse):
+                    level.generate(level.levels[level.level_num])
+                    titleing = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if build_button.rect.collidepoint(mouse):
+                    titleing = False
+                    print("level.build()")
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if quit_button.rect.collidepoint(mouse):
                     pygame.quit()
                     exit()
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_button.rect.collidepoint(mouse):
-                    level.generate(level.levels[level.level_num])
-                    isTitle = False
 
     win.fill(white)
     
@@ -476,10 +458,9 @@ while True:
         win.blit(tutorial_text[3], (130, 635))
 
     for b in blocks:
-        b.draw()
+        draw(b)
 
     for r in rats:
-        r.draw()
         r.update()
 
     sprites["trash"].collide()
