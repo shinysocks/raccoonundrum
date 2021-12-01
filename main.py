@@ -14,10 +14,19 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 clock = pygame.time.Clock()
 music = pygame.mixer.music
 blocks, rats = [], []
+levels = {}
+with open("levels.txt", 'r') as file:
+    for level in file:
+        (key, value) = level.split(":")
+        levels[int(key)] = list(value)
+    print(levels)
+    
 sprites = {}
 size = 70
 white = (255, 255, 255)
-isTitle = True
+titleing = True
+building = False
+
 
 # Music & Sounds
 music.load("assets/background_music.wav")
@@ -107,6 +116,19 @@ class QuitButton(StartButton):
         self.images = [
             pygame.image.load("assets/quit0.png"),
             pygame.image.load("assets/quit1.png"),
+            ]
+
+
+class BuildButton(StartButton):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.hovered = pygame.Surface((100, 50))
+        # pygame.image.load("assets/build_hover.png")
+        self.images = [
+            pygame.Surface((120, 50)),
+            pygame.Surface((80, 50)),
+            # pygame.image.load("assets/build0.png"),
+            # pygame.image.load("assets/build1.png"),
             ]
 
 
@@ -269,8 +291,12 @@ class MazeRatSide(MazeRatUp):
             self.image = self.images[3]
 
         self.collide()
-            
 
+class Build(object):
+    def __init__(self):
+        pass
+
+            
 class Level(object):
     def __init__(self):
         self.level_num = 1
@@ -278,72 +304,7 @@ class Level(object):
         self.sprites = sprites
         self.blocks = blocks
         self.rats = rats
-        self.levels = {
-                2: [  # hashtag
-                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
-                    ],
-
-                3: [  # tricky
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    ],
-
-                5: [  # tutorial
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    2, 0, 0, 0, 1, 1, 0, 0, 0, 3,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
-                    4, 0, 0, 0, 1, 1, 0, 0, 0, 4,
-                    1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    ],
-
-                4: [  # rapunzel
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                    0, 1, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 0, 0, 0, 4, 1, 2, 0, 0,
-                    0, 1, 1, 1, 0, 1, 1, 0, 1, 0,
-                    0, 1, 4, 0, 0, 0, 1, 1, 1, 0,
-                    0, 0, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 1, 1, 1, 3, 1, 1, 0, 0,
-                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
-                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0,
-                    5, 0, 0, 0, 0, 4, 0, 0, 0, 5,
-                    ],
-
-                1: [  # upside
-                    4, 0, 0, 0, 0, 5, 0, 0, 0, 4,
-                    0, 1, 0, 1, 0, 0, 1, 0, 1, 1,
-                    0, 1, 0, 1, 0, 0, 1, 0, 1, 1,
-                    0, 1, 0, 1, 0, 0, 1, 0, 1, 1,
-                    0, 1, 0, 1, 0, 0, 1, 0, 1, 3,
-                    2, 1, 0, 1, 0, 0, 1, 0, 1, 0,
-                    1, 1, 0, 1, 0, 0, 1, 0, 1, 0,
-                    1, 1, 0, 1, 0, 0, 1, 0, 1, 0,
-                    1, 1, 0, 1, 0, 0, 1, 0, 1, 0,
-                    4, 0, 0, 0, 5, 0, 0, 0, 0, 4,
-                    ],
-                    }
+        self.levels = levels
 
     def generate(self, lev_list):
         self.blocks.clear()
@@ -352,19 +313,19 @@ class Level(object):
         x = 0
         y = 0
         for _ in lev_list:
-            if lev_list[x + (y*10)] == 1:
+            if lev_list[x + (y*10)] == "1":
                 MazeBlock((x, y))
 
-            if lev_list[x + (y*10)] == 2:
+            if lev_list[x + (y*10)] == "2":
                 self.sprites["raccoon"] = Raccoon([x, y])
 
-            if lev_list[x + (y*10)] == 3:
+            if lev_list[x + (y*10)] == "3":
                 self.sprites["trash"] = MazeTrash([x, y])
 
-            if lev_list[x + (y*10)] == 4:
+            if lev_list[x + (y*10)] == "4":
                 MazeRatSide([x, y])
 
-            if lev_list[x + (y*10)] == 5:
+            if lev_list[x + (y*10)] == "5":
                 MazeRatUp([x, y])
 
             x += 1
@@ -373,7 +334,7 @@ class Level(object):
                 y += 1
 
     def lev_up(self):
-        global isTitle
+        global titleing
         levelup_sound.play(0)
         fade((255, 255, 250))
         win.fill(white)
@@ -386,7 +347,7 @@ class Level(object):
             self.generate(self.levels[self.level_num])
         except KeyError:
             self.level_num = 1
-            isTitle = True
+            titleing = True
 
     def restart(self):
         death_sound.play(0)
@@ -415,11 +376,17 @@ class Level(object):
         self.generate(self.levels[self.level_num])
         pygame.display.flip()
 
+    def build(self):
+        pass
+
+
 
 # Objects & Functions
 title = Title((0, 0))
 start_button = StartButton((290, 375))
-quit_button = QuitButton((295, 505))
+build_button = BuildButton((290, 470))
+quit_button = QuitButton((300, 550))
+
 level = Level()
 maze = Maze()
 
@@ -445,7 +412,7 @@ def fade(color):
 music.play(-1)
 # Game Loop
 while True:
-    if isTitle:
+    if titleing:
         music.pause()
         title_music.play(-1)
 
@@ -457,12 +424,13 @@ while True:
     quit_check()
 
     # Title Screen
-    while isTitle:
+    while titleing:
         win.fill(white)
         title.update()
 
         mouse = pygame.mouse.get_pos()
         start_button.hover(mouse)
+        build_button.hover(mouse)
         quit_button.hover(mouse)
         pygame.display.flip()
 
@@ -472,14 +440,19 @@ while True:
                 exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.rect.collidepoint(mouse):
+                    level.generate(level.levels[level.level_num])
+                    titleing = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if build_button.rect.collidepoint(mouse):
+                    titleing = False
+                    print("level.build()")
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if quit_button.rect.collidepoint(mouse):
                     pygame.quit()
                     exit()
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_button.rect.collidepoint(mouse):
-                    level.generate(level.levels[level.level_num])
-                    isTitle = False
 
     win.fill((255, 255, 255))
     maze.draw(win)
