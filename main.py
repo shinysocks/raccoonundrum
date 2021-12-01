@@ -390,9 +390,10 @@ def quit_check():
 
 
 def fade(color):
-    fade_win = pygame.Surface((700, 700))
+    fade_win = pygame.Surface((700, 700), pygame.SRCALPHA)
+    fade_win.set_alpha(10)
     fade_win.fill(color)
-    for alpha in range(0, 280):
+    for alpha in range(30, 300):
         quit_check()
         fade_win.set_alpha(alpha)
         win.blit(fade_win, (0, 0))
@@ -450,18 +451,18 @@ while True:
     sprites["raccoon"].update(keys_pressed)
     sprites["trash"].update(keys_pressed)
 
-    # tutorial text
-    if level.level_num == 0:
-        win.blit(tutorial_text[0], (30, 10))
-        win.blit(tutorial_text[1], (170, 75))
-        win.blit(tutorial_text[2], (80, 565))
-        win.blit(tutorial_text[3], (130, 635))
-
     for b in blocks:
         draw(b)
 
     for r in rats:
         r.update()
+
+    # tutorial text
+    if level.level_num == 1:
+        win.blit(tutorial_text[0], (30, 10))
+        win.blit(tutorial_text[1], (170, 75))
+        win.blit(tutorial_text[2], (80, 565))
+        win.blit(tutorial_text[3], (130, 635))
 
     sprites["trash"].collide()
     
