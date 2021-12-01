@@ -59,8 +59,8 @@ class Block(object):
         self.image = self.images[randint(0, 3)]
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
 
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
+    def draw(self):
+        win.blit(self.image, self.rect)
 
 
 class Title(Block):
@@ -79,7 +79,7 @@ class Title(Block):
         if int(self.current_image) >= len(self.images):
             self.current_image = 0
         self.image = self.images[int(self.current_image)]
-        self.draw(win)
+        self.draw()
 
 
 class StartButton(Title):
@@ -101,7 +101,7 @@ class StartButton(Title):
                 button_sound.play(0)
                 self.over = True
             self.image = self.hovered
-            self.draw(win)
+            self.draw()
 
         if not self.rect.collidepoint(mouse):
             self.over = False
@@ -178,7 +178,7 @@ class Raccoon(Block):
             self.image = self.images[3]
             self.move_collide(0, 1)
 
-        self.draw(win)
+        self.draw()
 
 
 class Trash(Raccoon):
@@ -476,10 +476,10 @@ while True:
         win.blit(tutorial_text[3], (130, 635))
 
     for b in blocks:
-        b.draw(win)
+        b.draw()
 
     for r in rats:
-        r.draw(win)
+        r.draw()
         r.update()
 
     sprites["trash"].collide()
