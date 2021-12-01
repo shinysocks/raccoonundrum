@@ -55,18 +55,21 @@ tutorial_text = [
                 
 
 # Classes
-class Maze(object):
-    def __init__(self):
-        self.image = pygame.Surface((700, 700))
-        self.rect = self.image.get_rect()
-
-    def draw(self, surf):
-        surf.blit(self.image, self.rect)
-
-
-class Title(Maze):
+class Block():
     def __init__(self, pos):
-        super().__init__()
+        blocks.append(self)
+        self.images = [
+            pygame.image.load("assets/block0.jpg"),
+            pygame.image.load("assets/block1.jpg"),
+            pygame.image.load("assets/block2.jpg"),
+            pygame.image.load("assets/block3.jpg"),
+            ]
+        self.image = self.images[randint(0, 3)]
+        self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
+
+
+class Title():
+    def __init__(self, pos):
         self.images = [
             pygame.image.load("assets/title0.jpg"),
             pygame.image.load("assets/title1.jpg"),
@@ -80,7 +83,7 @@ class Title(Maze):
         if int(self.current_image) >= len(self.images):
             self.current_image = 0
         self.image = self.images[int(self.current_image)]
-        self.draw(win)
+        draw(self)
 
 
 class StartButton(Title):
@@ -102,7 +105,7 @@ class StartButton(Title):
                 button_sound.play(0)
                 self.over = True
             self.image = self.hovered
-            self.draw(win)
+            draw(self)
 
         if not self.rect.collidepoint(mouse):
             self.over = False
@@ -132,23 +135,8 @@ class BuildButton(StartButton):
             ]
 
 
-class MazeBlock(Maze):
+class Raccoon():
     def __init__(self, pos):
-        super().__init__()
-        blocks.append(self)
-        self.images = [
-            pygame.image.load("assets/block0.jpg"),
-            pygame.image.load("assets/block1.jpg"),
-            pygame.image.load("assets/block2.jpg"),
-            pygame.image.load("assets/block3.jpg"),
-            ]
-        self.image = self.images[randint(0, 3)]
-        self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
-
-
-class Raccoon(Maze):
-    def __init__(self, pos):
-        super().__init__()
         self.images = [
             pygame.image.load("assets/raccoon0.jpg"),
             pygame.image.load("assets/raccoon1.jpg"),
@@ -206,17 +194,17 @@ class Raccoon(Maze):
             self.image = self.images[3]
             self.move_collide(0, 3)
 
-        self.draw(maze.image)
+        draw(self)
 
 
-class MazeTrash(Raccoon):
+class Trash(Raccoon):
     def __init__(self, pos):
         super().__init__(pos)
         self.images = [
-            pygame.image.load("assets/trash0.png"),
             pygame.image.load("assets/trash1.png"),
-            pygame.image.load("assets/trash2.png"),
+            pygame.image.load("assets/trash0.png"),
             pygame.image.load("assets/trash3.png"),
+            pygame.image.load("assets/trash2.png"),
             ]
         self.image = self.images[2]
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, 45, 45)
@@ -229,9 +217,8 @@ class MazeTrash(Raccoon):
             level.lev_up()
 
 
-class MazeRatUp(Maze):
+class RatUp():
     def __init__(self, pos):
-        super().__init__()
         rats.append(self)
         self.images = [
             pygame.transform.rotate(pygame.image.load("assets/rats0.png"), 180),
@@ -263,17 +250,18 @@ class MazeRatUp(Maze):
             level.restart()
 
     def update(self):
+        self.rect.y += self.vel
+        self.hitrect.y += self.vel
         if self.vel == -4:
             self.image = self.images[0]
         else:
             self.image = self.images[1]
-        self.rect.y += self.vel
-        self.hitrect.y += self.vel
 
+        draw(self)
         self.collide()
 
 
-class MazeRatSide(MazeRatUp):
+class RatSide(RatUp):
     def __init__(self, pos):
         super().__init__(pos)
         rats.append(self)
@@ -289,8 +277,10 @@ class MazeRatSide(MazeRatUp):
             self.image = self.images[2]
         else:
             self.image = self.images[3]
-
+        
+        draw(self)
         self.collide()
+
 
 class Build(object):
     def __init__(self):
@@ -314,19 +304,19 @@ class Level(object):
         y = 0
         for _ in lev_list:
             if lev_list[x + (y*10)] == "1":
-                MazeBlock((x, y))
+                Block((x, y))
 
             if lev_list[x + (y*10)] == "2":
                 self.sprites["raccoon"] = Raccoon([x, y])
 
             if lev_list[x + (y*10)] == "3":
-                self.sprites["trash"] = MazeTrash([x, y])
+                self.sprites["trash"] = Trash([x, y])
 
             if lev_list[x + (y*10)] == "4":
-                MazeRatSide([x, y])
+                RatSide([x, y])
 
             if lev_list[x + (y*10)] == "5":
-                MazeRatUp([x, y])
+                RatUp([x, y])
 
             x += 1
             if x > 9:
@@ -380,15 +370,16 @@ class Level(object):
         pass
 
 
-
 # Objects & Functions
 title = Title((0, 0))
 start_button = StartButton((290, 375))
 build_button = BuildButton((290, 470))
 quit_button = QuitButton((300, 550))
-
 level = Level()
-maze = Maze()
+
+
+def draw(self):
+    win.blit(self.image, self.rect)
 
 
 def quit_check():
@@ -403,7 +394,6 @@ def fade(color):
     fade_win.fill(color)
     for alpha in range(0, 280):
         quit_check()
-        maze.draw(win)
         fade_win.set_alpha(alpha)
         win.blit(fade_win, (0, 0))
         pygame.display.update()
@@ -454,9 +444,7 @@ while True:
                     pygame.quit()
                     exit()
 
-    win.fill((255, 255, 255))
-    maze.draw(win)
-    maze.image.fill((255, 255, 255))
+    win.fill(white)
     
     keys_pressed = pygame.key.get_pressed()
     sprites["raccoon"].update(keys_pressed)
@@ -470,10 +458,9 @@ while True:
         win.blit(tutorial_text[3], (130, 635))
 
     for b in blocks:
-        b.draw(maze.image)
+        draw(b)
 
     for r in rats:
-        r.draw(maze.image)
         r.update()
 
     sprites["trash"].collide()
