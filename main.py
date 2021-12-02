@@ -13,15 +13,14 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 # Variables
 clock = pygame.time.Clock()
 music = pygame.mixer.music
-blocks, rats = [], []
-sprites = {}
+lives = 3
+blocks, rats, hearts, sprites = [], [], {}, {}
 size = 70
 white = (255, 255, 255)
-titleing = True
+titling = True
 
 # Music & Sounds
 music.load("assets/background_music.wav")
-
 title_music = pygame.mixer.Sound("assets/title_theme.wav")
 button_sound = pygame.mixer.Sound("assets/button_sound.wav")
 death_sound = pygame.mixer.Sound("assets/death_sound.wav")
@@ -33,20 +32,21 @@ levelup_image = pygame.image.load("assets/complete.jpg")
 
 # Tutorial
 font = pygame.font.Font("assets/font.ttf", 50)
-tutorial_text = [
-    font.render("the raccoon and the trash", True, (30, 30, 30)), 
-    font.render("move contrary.", True, (30, 30, 30)),
+text = [
+    font.render("the raccoon and", True, (30, 30, 30)),
+    font.render("the trash move contrary.", True, (30, 30, 30)),
     font.render("if they strike the rats,", True, (30, 30, 30)),
     font.render("it won't be merry.", True, (30, 30, 30)),
     font.render("try not to do that again", True, (0, 0, 0)),
     font.render("they should be fine...", True, (0, 0, 0)),
     font.render("again? seriously?", True, (0, 0, 0)),
     font.render("stop. you're hurting them.", True, (255, 0, 0)),
+    font.render("-1", True, (255, 0, 0)),
     ]
                 
 
 # Classes
-class Block():
+class Block:
     def __init__(self, pos):
         blocks.append(self)
         self.images = [
@@ -59,7 +59,7 @@ class Block():
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
 
 
-class Title():
+class Title:
     def __init__(self, pos):
         self.images = [
             pygame.image.load("assets/title0.jpg"),
@@ -69,8 +69,8 @@ class Title():
         self.image = self.images[int(self.current_image)]
         self.rect = self.image.get_rect(topleft=pos)
 
-    def update(self):
-        self.current_image += .003
+    def update(self, speed):
+        self.current_image += speed
         if int(self.current_image) >= len(self.images):
             self.current_image = 0
         self.image = self.images[int(self.current_image)]
@@ -90,17 +90,17 @@ class StartButton(Title):
         self.image = self.images[int(self.current_image)]
         self.rect = self.image.get_rect(topleft=(pos[0], pos[1]))
 
-    def hover(self, mouse):
-        if self.rect.collidepoint(mouse):
+    def hover(self, mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
             if not self.over:
                 button_sound.play(0)
                 self.over = True
             self.image = self.hovered
             draw(self)
 
-        if not self.rect.collidepoint(mouse):
+        if not self.rect.collidepoint(mouse_pos):
             self.over = False
-            self.update()
+            self.update(.003)
 
 
 class QuitButton(StartButton):
@@ -113,7 +113,7 @@ class QuitButton(StartButton):
             ]
 
 
-class Raccoon():
+class Raccoon:
     def __init__(self, pos):
         self.images = [
             pygame.image.load("assets/raccoon0.jpg"),
@@ -195,7 +195,7 @@ class Trash(Raccoon):
             level.lev_up()
 
 
-class RatUp():
+class RatUp:
     def __init__(self, pos):
         rats.append(self)
         self.images = [
@@ -259,42 +259,27 @@ class RatSide(RatUp):
         draw(self)
         self.collide()
 
-            
+
+class Hearts(Title):
+    def __init__(self, pos):
+        super().__init__(pos)
+        self.images = [
+            pygame.image.load("assets/heart0.png"),
+            pygame.image.load("assets/heart1.png"),
+            ]
+        self.current_image = 0
+        self.image = self.images[int(self.current_image)]
+        self.rect = self.image.get_rect(topleft=pos)
+
+
 class Level(object):
     def __init__(self):
         self.level_num = 1
-        self.deaths = 0
         self.sprites = sprites
         self.blocks = blocks
         self.rats = rats
         self.levels = {
-                2: [  # hashtag
-                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
-                    ],
-
-                3: [  # tricky
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    ],
-
-                5: [  # tutorial
+                1: [  # tutorial
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     2, 0, 0, 0, 1, 1, 0, 0, 0, 3,
@@ -307,20 +292,33 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     ],
 
-                4: [  # rapunzel
-                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-                    0, 1, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 0, 0, 0, 4, 1, 2, 0, 0,
-                    0, 1, 1, 1, 0, 1, 1, 0, 1, 0,
-                    0, 1, 4, 0, 0, 0, 1, 1, 1, 0,
-                    0, 0, 1, 1, 1, 0, 1, 1, 1, 0,
-                    0, 1, 1, 1, 1, 3, 1, 1, 0, 0,
-                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
-                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0,
-                    5, 0, 0, 0, 0, 4, 0, 0, 0, 5,
+                2: [  # not sure yet
+                    0, 5, 0, 2, 0, 1, 0, 5, 0, 5,
+                    4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
+                    0, 0, 0, 0, 0, 1, 3, 0, 0, 0,
+                    4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
+                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
+                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
+                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    5, 0, 5, 0, 0, 0, 0, 0, 5, 0,
                     ],
 
-                1: [  # upside
+                3: [  # hashtag
+                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
+                    ],
+
+                4: [  # upside
                     4, 0, 0, 0, 0, 5, 0, 0, 0, 4,
                     0, 1, 0, 1, 0, 0, 1, 0, 1, 1,
                     0, 1, 0, 1, 0, 0, 1, 0, 1, 1,
@@ -332,6 +330,32 @@ class Level(object):
                     1, 1, 0, 1, 0, 0, 1, 0, 1, 0,
                     4, 0, 0, 0, 5, 0, 0, 0, 0, 4,
                     ],
+
+                5: [  # tricky
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    ],
+
+                6: [  # rapunzel
+                    0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                    0, 1, 1, 1, 1, 0, 1, 1, 1, 0,
+                    0, 1, 0, 0, 0, 4, 1, 2, 0, 0,
+                    0, 1, 1, 1, 0, 1, 1, 0, 1, 0,
+                    0, 1, 4, 0, 0, 0, 1, 1, 1, 0,
+                    0, 0, 1, 1, 1, 0, 1, 1, 1, 0,
+                    0, 1, 1, 1, 1, 3, 1, 1, 0, 0,
+                    0, 0, 1, 1, 1, 1, 1, 1, 1, 0,
+                    0, 1, 0, 1, 0, 1, 0, 1, 0, 0,
+                    5, 0, 0, 0, 0, 4, 0, 0, 0, 5,
+                    ]
                     }
 
     def generate(self, lev_list):
@@ -362,45 +386,49 @@ class Level(object):
                 y += 1
 
     def lev_up(self):
-        global titleing
+        global titling
         levelup_sound.play(0)
-        fade((255, 255, 250))
-        win.fill(white)
-        win.blit(levelup_image, (0, 0))
-        pygame.display.flip()
+        fade(levelup_image)
         quit_check()
-        sleep(3)
+        sleep(4)
         self.level_num += 1
         try:
             self.generate(self.levels[self.level_num])
         except KeyError:
             self.level_num = 1
-            titleing = True
+            titling = True
 
     def restart(self):
+        global titling
         death_sound.play(0)
-        fade((150, 0, 0))
-        win.blit(death_image, (0, 0))
-        pygame.display.flip()
+        fade(death_image)
 
-        if self.deaths == 0:
-            win.blit(tutorial_text[4], (70, 290))
-            win.blit(tutorial_text[5], (90, 360))
+        heart_count = len(hearts)
+        if heart_count == 4:
+            win.blit(text[4], (70, 290))
+            win.blit(text[5], (90, 360))
             pygame.display.flip()
-            sleep(4)
-
-        if self.deaths == 1:
-            win.blit(tutorial_text[6], (130, 320))
+            heart_minus()
+        if heart_count == 3:
+            win.blit(text[6], (130, 320))
             pygame.display.flip()
-            sleep(4)
-
-        if self.deaths == 2:
-            win.blit(tutorial_text[7], (25, 320))
+            heart_minus()
+        if heart_count == 2:
+            win.blit(text[7], (25, 320))
             pygame.display.flip()
-            sleep(4)
+            heart_minus()
+        if heart_count == 1:
+            music.pause()
+            death_surf = pygame.Surface((700, 700), pygame.SRCALPHA)
+            death_surf.fill((0, 0, 0))
+            fade(death_surf)
+            titling = True
 
-        self.deaths += 1
-        sleep(1.75)
+        try:
+            hearts.popitem()
+        except KeyError:
+            pass
+
         self.generate(self.levels[self.level_num])
         pygame.display.flip()
 
@@ -408,8 +436,15 @@ class Level(object):
 # Objects & Functions
 title = Title((0, 0))
 start_button = StartButton((290, 380))
-quit_button = QuitButton((300, 505))
+quit_button = QuitButton((295, 505))
 level = Level()
+
+
+def heart_minus():
+    sleep(1)
+    win.blit(text[8], (645, 0))
+    pygame.display.flip()
+    sleep(2)
 
 
 def draw(self):
@@ -423,21 +458,18 @@ def quit_check():
             exit()
 
 
-def fade(color):
-    fade_win = pygame.Surface((700, 700), pygame.SRCALPHA)
-    fade_win.set_alpha(10)
-    fade_win.fill(color)
-    for alpha in range(30, 300):
+def fade(image):
+    for alpha in range(300):
         quit_check()
-        fade_win.set_alpha(alpha)
-        win.blit(fade_win, (0, 0))
+        image.set_alpha(alpha)
+        win.blit(image, (0, 0))
         pygame.display.update()
 
 
 music.play(-1)
 # Game Loop
 while True:
-    if titleing:
+    if titling:
         music.pause()
         title_music.play(-1)
 
@@ -449,9 +481,14 @@ while True:
     quit_check()
 
     # Title Screen
-    while titleing:
+    while titling:
         win.fill(white)
-        title.update()
+        hearts[4] = Hearts((630, 0))
+        hearts[3] = Hearts((565, 0))
+        hearts[2] = Hearts((500, 0))
+        hearts[1] = Hearts((435, 0))
+        level.level_num = 1
+        title.update(.003)
 
         mouse = pygame.mouse.get_pos()
         start_button.hover(mouse)
@@ -466,7 +503,7 @@ while True:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.rect.collidepoint(mouse):
                     level.generate(level.levels[level.level_num])
-                    titleing = False
+                    titling = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if quit_button.rect.collidepoint(mouse):
@@ -481,16 +518,19 @@ while True:
 
     for b in blocks:
         draw(b)
-
     for r in rats:
         r.update()
 
     # tutorial text
     if level.level_num == 1:
-        win.blit(tutorial_text[0], (30, 10))
-        win.blit(tutorial_text[1], (170, 75))
-        win.blit(tutorial_text[2], (80, 565))
-        win.blit(tutorial_text[3], (130, 635))
+        win.blit(text[0], (30, 10))
+        win.blit(text[1], (30, 75))
+        win.blit(text[2], (80, 565))
+        win.blit(text[3], (130, 635))
+
+    for k in hearts:
+        draw(hearts[k])
+        hearts[k].update(.05)
 
     sprites["trash"].collide()
     
