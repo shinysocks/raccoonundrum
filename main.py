@@ -17,33 +17,21 @@ lives = 3
 blocks, rats, hearts, sprites = [], [], {}, {}
 size = 70
 white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+gray = (40, 40, 40)
 titling = True
 
-# Music & Sounds
+# Load
 music.load("assets/background_music.wav")
 title_music = pygame.mixer.Sound("assets/title_theme.wav")
 button_sound = pygame.mixer.Sound("assets/button_sound.wav")
 death_sound = pygame.mixer.Sound("assets/death_sound.wav")
 levelup_sound = pygame.mixer.Sound("assets/complete_sound.wav")
-
-# Art
 death_image = pygame.image.load("assets/death.jpg")
 levelup_image = pygame.image.load("assets/complete.jpg")
-
-# Tutorial
 font = pygame.font.Font("assets/font.ttf", 50)
-text = [
-    font.render("the raccoon and", True, (30, 30, 30)),
-    font.render("the trash move contrary.", True, (30, 30, 30)),
-    font.render("if they strike the rats,", True, (30, 30, 30)),
-    font.render("it won't be merry.", True, (30, 30, 30)),
-    font.render("try not to do that again", True, (0, 0, 0)),
-    font.render("they should be fine...", True, (0, 0, 0)),
-    font.render("again? seriously?", True, (0, 0, 0)),
-    font.render("stop. you're hurting them.", True, (255, 0, 0)),
-    font.render("-1", True, (255, 0, 0)),
-    ]
-                
+
 
 # Classes
 class Block:
@@ -100,7 +88,7 @@ class StartButton(Title):
 
         if not self.rect.collidepoint(mouse_pos):
             self.over = False
-            self.update(.003)
+            self.update(.05)
 
 
 class QuitButton(StartButton):
@@ -206,7 +194,7 @@ class RatUp:
             ]
         self.image = self.images[0]
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, 70, 70)
-        self.hitrect = pygame.Rect(pos[0]*size, pos[1]*size, 40, 55)
+        self.hitrect = pygame.Rect(pos[0]*size, pos[1]*size, 40, 50)
         self.hitrect.center = self.rect.center
         self.vel = 4
 
@@ -244,7 +232,7 @@ class RatSide(RatUp):
         super().__init__(pos)
         rats.append(self)
         self.image = self.images[2]
-        self.hitrect = pygame.Rect(pos[0]*size, pos[1]*size, 55, 40)
+        self.hitrect = pygame.Rect(pos[0]*size, pos[1]*size, 50, 40)
         self.hitrect.center = self.rect.center
         self.vel = 2
 
@@ -404,23 +392,29 @@ class Level(object):
         fade(death_image)
 
         heart_count = len(hearts)
+        if heart_count == 5:
+            write("try not to do that again", (70, 290), black)
+            write("they should be fine", (100, 360), black)
+            pygame.display.flip()
+            heart_minus()
         if heart_count == 4:
-            win.blit(text[4], (70, 290))
-            win.blit(text[5], (90, 360))
+            write("again? seriously?", (135, 325), black)
             pygame.display.flip()
             heart_minus()
         if heart_count == 3:
-            win.blit(text[6], (130, 320))
+            write("stop.", (285, 290), red)
+            write("you are hurting them.", (80, 360), black)
             pygame.display.flip()
             heart_minus()
         if heart_count == 2:
-            win.blit(text[7], (25, 320))
+            write("you are on", (210, 290), red)
+            write("the verge of death", (120, 360), red)
             pygame.display.flip()
             heart_minus()
         if heart_count == 1:
             music.pause()
             death_surf = pygame.Surface((700, 700), pygame.SRCALPHA)
-            death_surf.fill((0, 0, 0))
+            death_surf.fill(black)
             fade(death_surf)
             titling = True
 
@@ -442,13 +436,18 @@ level = Level()
 
 def heart_minus():
     sleep(1)
-    win.blit(text[8], (645, 0))
+    write("-1", (645, 0), red)
     pygame.display.flip()
     sleep(2)
 
 
-def draw(self):
-    win.blit(self.image, self.rect)
+def draw(class_name):
+    win.blit(class_name.image, class_name.rect)
+
+
+def write(words, pos, color):
+    game_text = font.render(words, True, color)
+    win.blit(game_text, pos)
 
 
 def quit_check():
@@ -483,12 +482,13 @@ while True:
     # Title Screen
     while titling:
         win.fill(white)
-        hearts[4] = Hearts((630, 0))
-        hearts[3] = Hearts((565, 0))
-        hearts[2] = Hearts((500, 0))
-        hearts[1] = Hearts((435, 0))
+        hearts[5] = Hearts((630, 0))
+        hearts[4] = Hearts((565, 0))
+        hearts[3] = Hearts((500, 0))
+        hearts[2] = Hearts((435, 0))
+        hearts[1] = Hearts((370, 0))
         level.level_num = 1
-        title.update(.003)
+        title.update(.05)
 
         mouse = pygame.mouse.get_pos()
         start_button.hover(mouse)
@@ -521,12 +521,12 @@ while True:
     for r in rats:
         r.update()
 
-    # tutorial text
+    # tutorial level text
     if level.level_num == 1:
-        win.blit(text[0], (30, 10))
-        win.blit(text[1], (30, 75))
-        win.blit(text[2], (80, 565))
-        win.blit(text[3], (130, 635))
+        write("the raccoon &", (20, 10), gray)
+        write("the trash move contrary.", (20, 75), gray)
+        write("if they strike the rats,", (20, 565), gray)
+        write("it won't be merry.", (20, 635), gray)
 
     for k in hearts:
         draw(hearts[k])
