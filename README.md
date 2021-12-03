@@ -1,4 +1,4 @@
-# Racoonundrum 🦝
+# RACCOONUNDRUM 🦝
 ### a trashy puzzle game created by Noah Dinan aka shinysocks
 #### The mazes are infested with ***RATS!?!***
 
