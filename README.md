@@ -1,8 +1,8 @@
-# Raccoonundrum 🦝
-### a trashy puzzle game created by Noah Dinan aka shinysocks
+# Welcome to Raccoonundrum - a trashy puzzle game! 🦝
+### an original game created by Noah Dinan aka shinysocks
 #### The mazes are infested with ***RATS!?!***
 
-#### Help reunite the raccoon with the trashcan in this puzzling game.
+#### Help to reunite the raccoon with the trashcan in this puzzling game.
 
 ## Movement
  - press the <kbd>w</kbd><kbd>a</kbd><kbd>s</kbd><kbd>d</kbd>  or arrow keys to move the raccoon and the trashcan
