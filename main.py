@@ -1,10 +1,5 @@
 # DEDICATED TO EMILY
 
-# Encoding
-import base64
-
-code = base64.b64encode(b"""
-
 # Initial Setup
 import pygame
 from random import randint
@@ -540,7 +535,3 @@ while True:
     sprites["trash"].collide()
     
     pygame.display.flip()
-    
-""")
-
-exec(base64.b64decode(code))
