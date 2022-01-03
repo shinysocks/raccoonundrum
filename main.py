@@ -146,19 +146,19 @@ class Raccoon:
     def update(self, pressed):
         if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
             self.image = self.images[0]
-            self.move_collide(-3, 0)
+            self.move_collide(-4, 0)
 
         if pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
             self.image = self.images[1]
-            self.move_collide(3, 0)
+            self.move_collide(4, 0)
 
         if pressed[pygame.K_w] or pressed[pygame.K_UP]:
             self.image = self.images[2]
-            self.move_collide(0, -3)
+            self.move_collide(0, -4)
 
         if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
             self.image = self.images[3]
-            self.move_collide(0, 3)
+            self.move_collide(0, 4)
 
         draw(self)
 
