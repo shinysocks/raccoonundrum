@@ -283,8 +283,8 @@ class Level(object):
                 2: [  # hashtag
                     1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
                     1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
@@ -476,7 +476,7 @@ while True:
         title_music.fadeout(2000)
         music.unpause()
 
-    clock.tick(60)
+    clock.tick(30)
     quit_check()
 
     # Title Screen
