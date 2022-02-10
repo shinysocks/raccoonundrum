@@ -146,19 +146,19 @@ class Raccoon:
     def update(self, pressed):
         if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
             self.image = self.images[0]
-            self.move_collide(-4, 0)
+            self.move_collide(-3, 0)
 
         if pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
             self.image = self.images[1]
-            self.move_collide(4, 0)
+            self.move_collide(3, 0)
 
         if pressed[pygame.K_w] or pressed[pygame.K_UP]:
             self.image = self.images[2]
-            self.move_collide(0, -4)
+            self.move_collide(0, -3)
 
         if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
             self.image = self.images[3]
-            self.move_collide(0, 4)
+            self.move_collide(0, 3)
 
         draw(self)
 
@@ -499,6 +499,16 @@ while True:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                  start_button.image = start_button.hovered
+                  pygame.draw.rect(win, white, (290, 380, 300, 300))
+                  draw(start_button)
+                  pygame.display.flip()
+                  sleep(1.75)
+                  level.generate(level.levels[level.level_num])
+                  titling = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.rect.collidepoint(mouse):
