@@ -474,7 +474,7 @@ while True:
         title_music.fadeout(2000)
         music.unpause()
 
-    clock.tick(30)
+    clock.tick(60)
     quit_check()
 
     # Title Screen
