@@ -514,7 +514,7 @@ while True:
                 exit()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_1:
                     start_button.image = start_button.hovered
                     pygame.draw.rect(win, white, (290, 380, 300, 300))
                     draw(start_button)
