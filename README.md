@@ -9,10 +9,10 @@
 ## Installation
 ### Online Release
 - Run online at https://replit.com/@shinysocks/Racoonundrum?v=1 
+
 ### Windows Release
-- Download [Raccoonundrum Installer](https://github.com/shinysocks/raccoonundrum/releases/download/v1.1/Racconundrum_Installer.exe)
-- The installer has been blocked by Windows defender because I do not own a 400$ validation certificate and it thinks that it is a virus.
-- You can select to allow threat in order to run it
+- Download [Raccoonundrum Installer](https://github.com/shinysocks/raccoonundrum/releases/download/v1.3/raccoonundrum_installer.exe)
+ 
 ### Linux Install
 `sudo apt install git`
 `sudo apt install python3-pip`
