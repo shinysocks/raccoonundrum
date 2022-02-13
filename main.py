@@ -2,7 +2,7 @@
 import pygame
 from random import randint
 from sys import exit
-from time import sleep
+from time import time, sleep
 
 pygame.init()
 win = pygame.display.set_mode((700, 700))
@@ -10,6 +10,7 @@ pygame.display.set_caption("Racoonundrum - a trashy game")
 
 # Variables
 clock = pygame.time.Clock()
+timer = time()
 music = pygame.mixer.music
 lives = 3
 blocks, rats, hearts, sprites = [], [], {}, {}
@@ -30,8 +31,10 @@ death_image = pygame.image.load("assets/death.jpg")
 levelup_image = pygame.image.load("assets/complete.jpg")
 font = pygame.font.Font("assets/font.ttf", 50)
 
-
 # Classes
+
+
+# Blocks of the maze
 class Block:
     def __init__(self, pos):
         blocks.append(self)
@@ -41,10 +44,11 @@ class Block:
             pygame.image.load("assets/block2.jpg"),
             pygame.image.load("assets/block3.jpg"),
             ]
-        self.image = self.images[randint(0, 3)]
+        self.image = self.images[randint(0, 3)]  # random image chosen
         self.rect = pygame.Rect(pos[0]*size, pos[1]*size, size, size)
 
 
+# Title animation
 class Title:
     def __init__(self, pos):
         self.images = [
@@ -63,6 +67,7 @@ class Title:
         draw(self)
 
 
+# Start and quit button animation and hovering
 class StartButton(Title):
     def __init__(self, pos):
         super().__init__(pos)
@@ -99,6 +104,7 @@ class QuitButton(StartButton):
             ]
 
 
+# Raccoon and Trash movement, animation, and collisions
 class Raccoon:
     def __init__(self, pos):
         self.images = [
@@ -114,7 +120,7 @@ class Raccoon:
         self.isTrash = False
 
     def move_collide(self, vel_x, vel_y):
-        if self.isTrash:
+        if self.isTrash:  # Reversed movement
             vel_x *= -1
             vel_y *= -1
 
@@ -181,6 +187,7 @@ class Trash(Raccoon):
             level.lev_up()
 
 
+# Enemy maze rats movement up & down + side to side
 class RatUp:
     def __init__(self, pos):
         rats.append(self)
@@ -196,7 +203,7 @@ class RatUp:
         self.hitrect.center = self.rect.center
         self.vel = 4
 
-    def collide(self):
+    def collide(self):  # collisions
         for block in blocks:
             if self.rect.colliderect(block.rect):
                 self.vel *= -1
@@ -246,6 +253,7 @@ class RatSide(RatUp):
         self.collide()
 
 
+# Hearts animation
 class Hearts(Title):
     def __init__(self, pos):
         super().__init__(pos)
@@ -258,6 +266,7 @@ class Hearts(Title):
         self.rect = self.image.get_rect(topleft=pos)
 
 
+# Level generation and progression
 class Level(object):
     def __init__(self):
         self.level_num = 1
@@ -278,18 +287,19 @@ class Level(object):
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                     ],
 
-                2: [  # hashtag
-                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
-                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
-                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
-                    ],
+                2: [  # tricky 2
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
+                ],
+
 
                 3: [  # updownup
                     4, 0, 0, 0, 0, 5, 0, 0, 0, 4,
@@ -305,30 +315,31 @@ class Level(object):
                 ],
 
                 4: [  # tricky
-                    0, 5, 0, 2, 0, 1, 0, 5, 0, 5,
+                    0, 0, 0, 2, 0, 1, 0, 5, 0, 0,
                     4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
-                    0, 0, 0, 0, 0, 1, 3, 0, 0, 0,
+                    0, 1, 0, 0, 0, 1, 3, 0, 1, 0,
                     4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
-                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
                     4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
-                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
                     4, 0, 0, 0, 1, 0, 0, 0, 0, 4,
-                    0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                    5, 0, 5, 0, 0, 0, 0, 0, 5, 0,
+                    0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
+                    0, 0, 5, 0, 0, 0, 0, 0, 0, 4,
                     ],
 
-                5: [  # tricky 2
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 0, 3,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    2, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                    1, 1, 1, 1, 1, 1, 1, 5, 1, 1,
-                    1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-                    ],
+                5: [  # hashtag
+                    1, 1, 1, 5, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 3, 0, 0, 0, 0, 0, 0, 0, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 0, 0, 0, 0, 2, 1,
+                    1, 1, 1, 0, 1, 1, 0, 1, 1, 1,
+                    1, 1, 1, 0, 1, 1, 5, 1, 1, 1,
+                ],
+
 
                 6: [  # rapunzel
                     0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
@@ -350,7 +361,7 @@ class Level(object):
         self.sprites.clear()
         x = 0
         y = 0
-        for _ in lev_list:
+        for _ in lev_list:  # Places corresponding game object as it relates to list values
             if lev_list[x + (y*10)] == 1:
                 Block((x, y))
 
@@ -371,24 +382,28 @@ class Level(object):
                 x = 0
                 y += 1
 
-    def lev_up(self):
+    def lev_up(self):  # Increases level
         global titling
         levelup_sound.play(0)
         fade(levelup_image)
         quit_check()
-        sleep(4)
+        sleep(1.5)
         self.level_num += 1
         try:
             self.generate(self.levels[self.level_num])
         except KeyError:
+            write("Final Time: " + str(round(time() - timer, 2)) + " seconds", (25, 635), (0, 255, 0))
+            pygame.display.flip()
+            sleep(4.5)
             self.level_num = 1
             titling = True
 
-    def restart(self):
+    def restart(self):  # restarts game
         global titling
         death_sound.play(0)
         fade(death_image)
 
+        # failure text
         heart_count = len(hearts)
         if heart_count == 5:
             write("try not to do that again", (70, 290), black)
@@ -432,30 +447,30 @@ quit_button = QuitButton((295, 505))
 level = Level()
 
 
-def heart_minus():
+def heart_minus():  # minus heart text
     sleep(1)
     write("-1", (645, 0), red)
     pygame.display.flip()
-    sleep(2)
+    sleep(1.75)
 
 
-def draw(class_name):
+def draw(class_name):  # draws sprites from classes on win
     win.blit(class_name.image, class_name.rect)
 
 
-def write(words, pos, color):
+def write(words, pos, color):  # writes text on win
     game_text = font.render(words, True, color)
     win.blit(game_text, pos)
 
 
-def quit_check():
+def quit_check():  # shortened quit checker
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             pygame.quit()
             exit()
 
 
-def fade(image):
+def fade(image):  # fades out screen
     for alpha in range(300):
         quit_check()
         image.set_alpha(alpha)
@@ -500,18 +515,20 @@ while True:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                  start_button.image = start_button.hovered
-                  pygame.draw.rect(win, white, (290, 380, 300, 300))
-                  draw(start_button)
-                  pygame.display.flip()
-                  sleep(1.75)
-                  level.generate(level.levels[level.level_num])
-                  titling = False
+                    start_button.image = start_button.hovered
+                    pygame.draw.rect(win, white, (290, 380, 300, 300))
+                    draw(start_button)
+                    pygame.display.flip()
+                    timer = time()
+                    sleep(.4)
+                    level.generate(level.levels[level.level_num])
+                    titling = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button.rect.collidepoint(mouse):
                     level.generate(level.levels[level.level_num])
                     titling = False
+                    timer = time()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if quit_button.rect.collidepoint(mouse):
