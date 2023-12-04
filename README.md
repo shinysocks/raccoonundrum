@@ -12,7 +12,7 @@
 - Or check out the itch.io page https://shinysocks.itch.io/raccoonundrum
 
 ### Windows Release
-- Download [Raccoonundrum Installer](https://gitlab.com/shinysocks/raccoonundrum/-/raw/main/raccoonundrum_installer.exe)
+- Download [Raccoonundrum Installer](https://github.com/shinysocks/raccoonundrum/raw/main/raccoonundrum_installer.exe)
  
 ### Linux Install
 Dependencies:
