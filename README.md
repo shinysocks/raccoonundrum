@@ -8,7 +8,7 @@
 
 ## Installation
 ### Online Releases
-- Run online at https://replit.com/@shinysocks/raccoonundrum?v=1
+- Run online at https://replit.com/@shinysocks/raccoonundrum
 - Or check out the itch.io page https://shinysocks.itch.io/raccoonundrum
 
 ### Windows Release
